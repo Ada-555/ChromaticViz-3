@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chromatic — Color Music Visualizer</title>
+    <title>Chromatic — Cosmic Portal Visualizer</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -14,8 +14,6 @@
             --mid: #00ffaa;
             --treble: #6600ff;
             --bg: #050508;
-            --glass: rgba(255,255,255,0.05);
-            --glass-border: rgba(255,255,255,0.1);
         }
         
         body {
@@ -24,338 +22,169 @@
             min-height: 100vh;
             overflow: hidden;
             color: #fff;
-            user-select: none;
         }
         
-        /* Canvas */
-        #canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-        }
+        canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
         
         /* Start Screen */
         .start-screen {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: var(--bg);
+            background: radial-gradient(ellipse at center, #0a0a15 0%, #050508 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 100;
-            transition: opacity 0.5s;
+            transition: opacity 0.8s;
         }
         
-        .start-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+        .start-screen.hidden { opacity: 0; pointer-events: none; }
         
         .start-title {
-            font-size: clamp(2.5rem, 10vw, 5rem);
+            font-size: clamp(3rem, 12vw, 7rem);
             font-weight: 300;
-            letter-spacing: 0.3em;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--bass), var(--mid), var(--treble));
+            letter-spacing: 0.4em;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--bass), var(--mid), var(--treble), var(--bass));
+            background-size: 300% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            animation: titleShift 10s linear infinite;
-            background-size: 300% 100%;
+            animation: shimmer 4s linear infinite;
         }
         
-        @keyframes titleShift {
+        @keyframes shimmer {
             0% { background-position: 0% 50%; }
             100% { background-position: 300% 50%; }
         }
         
         .start-subtitle {
-            font-size: 0.9rem;
-            color: rgba(255,255,255,0.4);
-            letter-spacing: 0.3em;
-            margin-bottom: 40px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: 0.4em;
+            margin-bottom: 50px;
             text-transform: uppercase;
         }
         
         #startBtn {
-            padding: 18px 50px;
+            padding: 20px 60px;
             font-family: inherit;
             font-size: 1rem;
             font-weight: 400;
-            letter-spacing: 0.2em;
+            letter-spacing: 0.3em;
             background: transparent;
-            border: 2px solid rgba(255,255,255,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
             color: #fff;
             border-radius: 50px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.4s;
             text-transform: uppercase;
         }
         
-        #startBtn:hover {
-            background: rgba(255,255,255,0.1);
+        #startBtn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.05);
             border-color: var(--mid);
-            box-shadow: 0 0 30px rgba(0,255,170,0.3);
+            box-shadow: 0 0 40px rgba(0,255,170,0.2);
         }
         
-        #startBtn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        #startBtn.error {
-            border-color: var(--bass);
-            color: var(--bass);
-        }
+        #startBtn:disabled { opacity: 0.4; cursor: not-allowed; }
+        #startBtn.error { border-color: var(--bass); color: var(--bass); }
         
         .start-note {
             margin-top: 20px;
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.3);
-            max-width: 400px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.25);
             text-align: center;
+            max-width: 350px;
+            line-height: 1.6;
         }
         
         /* UI Elements */
-        .settings-btn {
+        .ui-element {
             position: fixed;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .ui-element.visible { opacity: 1; }
+        
+        .settings-btn {
             top: 20px;
             right: 20px;
             width: 50px;
             height: 50px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
             border-radius: 50%;
             cursor: pointer;
-            z-index: 50;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            opacity: 0;
-            transition: all 0.3s;
+            font-size: 1.4rem;
         }
         
-        .settings-btn.visible {
-            opacity: 1;
-        }
+        .settings-btn:hover { background: rgba(255,255,255,0.1); }
         
-        .settings-btn:hover {
-            background: rgba(255,255,255,0.1);
-            transform: rotate(45deg);
-        }
-        
-        /* Settings Panel */
-        .settings-panel {
-            position: fixed;
-            top: 0; right: 0;
-            width: min(400px, 90vw);
-            height: 100%;
-            background: rgba(10,10,15,0.95);
-            backdrop-filter: blur(20px);
-            border-left: 1px solid var(--glass-border);
-            z-index: 60;
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow-y: auto;
-            padding: 30px;
-        }
-        
-        .settings-panel.open {
-            transform: translateX(0);
-        }
-        
-        .settings-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            letter-spacing: 0.1em;
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .close-btn {
-            width: 40px;
-            height: 40px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 50%;
-            cursor: pointer;
-            color: #fff;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .settings-section {
-            margin-bottom: 30px;
-        }
-        
-        .settings-section-title {
-            font-size: 0.75rem;
-            letter-spacing: 0.15em;
-            color: rgba(255,255,255,0.4);
-            text-transform: uppercase;
-            margin-bottom: 15px;
-        }
-        
-        .slider-control {
-            margin-bottom: 20px;
-        }
-        
-        .slider-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-        
-        .slider-value {
-            color: var(--mid);
-            font-weight: 600;
-        }
-        
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            -webkit-appearance: none;
-            background: rgba(255,255,255,0.1);
-            border-radius: 3px;
-            outline: none;
-        }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, var(--mid), var(--treble));
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(0,255,170,0.5);
-        }
-        
-        .theme-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-        
-        .theme-option {
-            aspect-ratio: 1;
-            border-radius: 12px;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: all 0.3s;
-        }
-        
-        .theme-option:hover {
-            transform: scale(1.05);
-        }
-        
-        .theme-option.active {
-            border-color: #fff;
-        }
-        
-        .toggle-control {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .toggle {
-            width: 50px;
-            height: 26px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 13px;
-            position: relative;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .toggle.active {
-            background: var(--mid);
-        }
-        
-        .toggle::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            border-radius: 50%;
-            top: 3px;
-            left: 3px;
-            transition: transform 0.3s;
-        }
-        
-        .toggle.active::after {
-            transform: translateX(24px);
-        }
-        
-        .viz-btn {
-            padding: 10px 20px;
-            font-family: inherit;
-            font-size: 0.8rem;
-            letter-spacing: 0.1em;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: rgba(255,255,255,0.6);
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-        }
-        
-        .viz-btn:hover {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-        }
-        
-        .viz-btn.active {
-            background: rgba(0,255,170,0.2);
-            border-color: var(--mid);
-            color: var(--mid);
-        }
-        
-        /* Info Bar */
-        .info-bar {
-            position: fixed;
-            bottom: 20px;
+        /* Viz Selector */
+        .viz-selector {
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 30px;
-            z-index: 50;
-            opacity: 0;
-            transition: opacity 0.3s;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 90vw;
         }
         
-        .info-bar.visible {
-            opacity: 1;
+        .viz-btn {
+            padding: 12px 24px;
+            font-family: inherit;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.6);
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        
+        .viz-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .viz-btn.active { background: rgba(0,255,170,0.15); border-color: var(--mid); color: var(--mid); }
+        
+        /* Info Bars */
+        .info-bar {
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 25px;
         }
         
         .info-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
         
         .info-label {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.4);
+            color: rgba(255,255,255,0.35);
         }
         
         .info-bar-fill {
-            width: 80px;
-            height: 4px;
+            width: 60px;
+            height: 3px;
             background: rgba(255,255,255,0.1);
             border-radius: 2px;
             overflow: hidden;
@@ -364,71 +193,169 @@
         .info-bar-fill-inner {
             height: 100%;
             border-radius: 2px;
-            transition: width 0.05s;
+            transition: width 0.03s;
         }
         
-        .bass-fill { background: var(--bass); box-shadow: 0 0 10px var(--bass); }
-        .mid-fill { background: var(--mid); box-shadow: 0 0 10px var(--mid); }
-        .treble-fill { background: var(--treble); box-shadow: 0 0 10px var(--treble); }
+        .bass-fill { background: var(--bass); box-shadow: 0 0 8px var(--bass); }
+        .mid-fill { background: var(--mid); box-shadow: 0 0 8px var(--mid); }
+        .treble-fill { background: var(--treble); box-shadow: 0 0 8px var(--treble); }
         
-        /* Viz Selector */
-        .viz-selector {
+        /* Settings Panel */
+        .settings-panel {
             position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 0; right: 0;
+            width: min(380px, 90vw);
+            height: 100%;
+            background: rgba(5,5,10,0.95);
+            backdrop-filter: blur(30px);
+            border-left: 1px solid rgba(255,255,255,0.08);
+            z-index: 60;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            padding: 35px 30px;
+        }
+        
+        .settings-panel.open { transform: translateX(0); }
+        
+        .settings-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 35px;
             display: flex;
-            gap: 10px;
-            z-index: 50;
-            opacity: 0;
-            transition: opacity 0.3s;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            color: #fff;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
             justify-content: center;
         }
         
-        .viz-selector.visible {
-            opacity: 1;
+        .settings-section { margin-bottom: 30px; }
+        
+        .settings-section-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            margin-bottom: 18px;
         }
         
-        /* Mobile */
-        @media (max-width: 600px) {
-            .viz-selector {
-                bottom: 160px;
-            }
-            .info-bar {
-                bottom: 220px;
-            }
+        .slider-control { margin-bottom: 22px; }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
         }
+        
+        .slider-value { color: var(--mid); font-weight: 600; }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--mid), var(--treble));
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,255,170,0.5);
+        }
+        
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        
+        .theme-option {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .theme-option:hover { transform: scale(1.08); }
+        .theme-option.active { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+        
+        .toggle-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        
+        .toggle {
+            width: 46px;
+            height: 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .toggle.active { background: var(--mid); }
+        
+        .toggle::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+        
+        .toggle.active::after { transform: translateX(22px); }
         
         /* Overlay */
         .overlay-backdrop {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
             z-index: 55;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s;
         }
         
-        .overlay-backdrop.visible {
-            opacity: 1;
-            pointer-events: auto;
+        .overlay-backdrop.visible { opacity: 1; pointer-events: auto; }
+        
+        /* Mobile */
+        @media (max-width: 600px) {
+            .viz-selector { bottom: 20px; }
+            .info-bar { bottom: 90px; }
+            .settings-panel { width: 100%; border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
         }
         
-        .fps-counter {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            font-size: 0.7rem;
-            color: rgba(255,255,255,0.3);
-            z-index: 50;
-            opacity: 0;
-        }
-        
-        .fps-counter.visible {
-            opacity: 1;
+        @media (max-height: 500px) and (orientation: landscape) {
+            .viz-selector { top: 20px; bottom: auto; }
+            .info-bar { top: 80px; bottom: auto; }
         }
     </style>
 </head>
@@ -437,33 +364,33 @@
     
     <div class="start-screen" id="startScreen">
         <h1 class="start-title">CHROMATIC</h1>
-        <p class="start-subtitle">Color Music Visualizer</p>
+        <p class="start-subtitle">Cosmic Portal Visualizer</p>
         <button id="startBtn" onclick="handleMicClick()">Connect Microphone</button>
-        <p class="start-note" id="startNote">Microphone access required for audio visualization</p>
+        <p class="start-note" id="startNote">Enable microphone access to transform your music into visual experiences</p>
     </div>
     
-    <button class="settings-btn" id="settingsBtn" onclick="toggleSettings()">⚙️</button>
+    <div class="ui-element settings-btn" id="settingsBtn" onclick="toggleSettings()">⚙️</div>
     
-    <div class="viz-selector" id="vizSelector">
-        <button class="viz-btn active" onclick="setViz('particles')">Particles</button>
+    <div class="ui-element viz-selector" id="vizSelector">
+        <button class="viz-btn active" onclick="setViz('portal')">Portal</button>
+        <button class="viz-btn" onclick="setViz('nebula')">Nebula</button>
+        <button class="viz-btn" onclick="setViz('pulses')">Pulses</button>
+        <button class="viz-btn" onclick="setViz('shards')">Shards</button>
         <button class="viz-btn" onclick="setViz('waves')">Waves</button>
-        <button class="viz-btn" onclick="setViz('rings')">Rings</button>
-        <button class="viz-btn" onclick="setViz('terrain')">Terrain</button>
-        <button class="viz-btn" onclick="setViz('fire')">Fire</button>
     </div>
     
-    <div class="info-bar" id="infoBar">
+    <div class="ui-element info-bar" id="infoBar">
         <div class="info-item">
             <span class="info-label">Bass</span>
-            <div class="info-bar-fill"><div class="info-bar-fill-inner bass-fill" id="bassBar" style="width: 0%"></div></div>
+            <div class="info-bar-fill"><div class="info-bar-fill-inner bass-fill" id="bassBar" style="width:0%"></div></div>
         </div>
         <div class="info-item">
             <span class="info-label">Mid</span>
-            <div class="info-bar-fill"><div class="info-bar-fill-inner mid-fill" id="midBar" style="width: 0%"></div></div>
+            <div class="info-bar-fill"><div class="info-bar-fill-inner mid-fill" id="midBar" style="width:0%"></div></div>
         </div>
         <div class="info-item">
             <span class="info-label">Treble</span>
-            <div class="info-bar-fill"><div class="info-bar-fill-inner treble-fill" id="trebleBar" style="width: 0%"></div></div>
+            <div class="info-bar-fill"><div class="info-bar-fill-inner treble-fill" id="trebleBar" style="width:0%"></div></div>
         </div>
     </div>
     
@@ -476,45 +403,34 @@
         </div>
         
         <div class="settings-section">
-            <div class="settings-section-title">Audio</div>
+            <div class="settings-section-title">Audio Response</div>
             <div class="slider-control">
-                <div class="slider-label">
-                    <span>Sensitivity</span>
-                    <span class="slider-value" id="sensitivityValue">100%</span>
-                </div>
-                <input type="range" id="sensitivity" min="50" max="300" value="100" oninput="updateSetting('sensitivity', this.value)">
+                <div class="slider-label"><span>Sensitivity</span><span class="slider-value" id="sensitivityVal">100%</span></div>
+                <input type="range" id="sensitivity" min="50" max="400" value="100" oninput="updateSetting('sensitivity', this.value)">
             </div>
             <div class="slider-control">
-                <div class="slider-label">
-                    <span>Smoothing</span>
-                    <span class="slider-value" id="smoothingValue">70%</span>
-                </div>
-                <input type="range" id="smoothing" min="0" max="95" value="70" oninput="updateSetting('smoothing', this.value)">
+                <div class="slider-label"><span>Smoothing</span><span class="slider-value" id="smoothingVal">50%</span></div>
+                <input type="range" id="smoothing" min="0" max="90" value="50" oninput="updateSetting('smoothing', this.value)">
+            </div>
+            <div class="slider-control">
+                <div class="slider-label"><span>Treble Boost</span><span class="slider-value" id="trebleBoostVal">100%</span></div>
+                <input type="range" id="trebleBoost" min="50" max="300" value="100" oninput="updateSetting('trebleBoost', this.value)">
             </div>
         </div>
         
         <div class="settings-section">
-            <div class="settings-section-title">Visualizer</div>
+            <div class="settings-section-title">Visual</div>
             <div class="slider-control">
-                <div class="slider-label">
-                    <span>Size</span>
-                    <span class="slider-value" id="particleSizeValue">100%</span>
-                </div>
-                <input type="range" id="particleSize" min="25" max="200" value="100" oninput="updateSetting('particleSize', this.value)">
+                <div class="slider-label"><span>Speed</span><span class="slider-value" id="speedVal">100%</span></div>
+                <input type="range" id="speed" min="20" max="300" value="100" oninput="updateSetting('speed', this.value)">
             </div>
             <div class="slider-control">
-                <div class="slider-label">
-                    <span>Speed</span>
-                    <span class="slider-value" id="particleSpeedValue">100%</span>
-                </div>
-                <input type="range" id="particleSpeed" min="25" max="300" value="100" oninput="updateSetting('particleSpeed', this.value)">
+                <div class="slider-label"><span>Intensity</span><span class="slider-value" id="intensityVal">100%</span></div>
+                <input type="range" id="intensity" min="20" max="200" value="100" oninput="updateSetting('intensity', this.value)">
             </div>
             <div class="slider-control">
-                <div class="slider-label">
-                    <span>Trails</span>
-                    <span class="slider-value" id="trailValue">15%</span>
-                </div>
-                <input type="range" id="trailLength" min="0" max="50" value="15" oninput="updateSetting('trailLength', this.value)">
+                <div class="slider-label"><span>Trails</span><span class="slider-value" id="trailVal">30%</span></div>
+                <input type="range" id="trail" min="0" max="95" value="30" oninput="updateSetting('trail', this.value)">
             </div>
         </div>
         
@@ -530,45 +446,35 @@
                 <div class="toggle" id="mirrorToggle" onclick="toggleOption('mirror')"></div>
             </div>
             <div class="toggle-control">
-                <span>Show FPS</span>
-                <div class="toggle" id="fpsToggle" onclick="toggleOption('fps')"></div>
+                <span>Auto Rotate</span>
+                <div class="toggle active" id="rotateToggle" onclick="toggleOption('rotate')"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // State
-        let audioContext = null;
-        let analyser = null;
-        let dataArray = null;
-        let sensitivity = 100;
-        let smoothing = 0.7;
-        let particleSize = 1;
-        let particleSpeed = 1;
-        let trailLength = 0.85;
-        let mirrorMode = false;
-        let showFps = false;
-        let currentViz = 'particles';
-        let currentTheme = 'cosmic';
-        let particles = [];
-        let lastBands = { bass: 0, mid: 0, treble: 0 };
-        let isStarted = false;
+        // === STATE ===
+        let audioCtx = null, analyser = null, dataArray = null;
+        let sensitivity = 100, smoothing = 0.5, trebleBoost = 100;
+        let speed = 1, intensity = 1, trailAmount = 0.7;
+        let mirrorMode = false, autoRotate = true;
+        let currentViz = 'portal', currentTheme = 'cosmic', isStarted = false;
+        let time = 0;
         
         // Themes
         const themes = {
-            cosmic: { bass: '#ff0066', mid: '#00ffaa', treble: '#6600ff' },
-            fire: { bass: '#ff4400', mid: '#ff0066', treble: '#ffaa00' },
-            ocean: { bass: '#0066ff', mid: '#00ffaa', treble: '#00aaff' },
-            neon: { bass: '#ff00ff', mid: '#00ffff', treble: '#ff00aa' },
-            gold: { bass: '#ffd700', mid: '#ff6600', treble: '#ff0066' },
-            arctic: { bass: '#00aaff', mid: '#00ffaa', treble: '#ffffff' },
-            aurora: { bass: '#00ff88', mid: '#88ff00', treble: '#ff00ff' },
-            matrix: { bass: '#00ff00', mid: '#88ff00', treble: '#00ff88' },
-            sunset: { bass: '#ff4400', mid: '#ff0066', treble: '#ffaa00' },
-            vapor: { bass: '#ff00ff', mid: '#00ffff', treble: '#ff0066' }
+            cosmic: { bass: '#ff0066', mid: '#00ffaa', treble: '#6600ff', bg: '#050508' },
+            fire: { bass: '#ff2200', mid: '#ff6600', treble: '#ffcc00', bg: '#080505' },
+            ocean: { bass: '#0066ff', mid: '#00ccff', treble: '#66ffff', bg: '#050810' },
+            neon: { bass: '#ff00ff', mid: '#00ffff', treble: '#ff00aa', bg: '#050508' },
+            gold: { bass: '#ff8800', mid: '#ffcc00', treble: '#ffff66', bg: '#080606' },
+            aurora: { bass: '#00ff88', mid: '#88ff00', treble: '#ff00ff', bg: '#050508' },
+            blood: { bass: '#cc0000', mid: '#ff3333', treble: '#ff6666', bg: '#080505' },
+            ice: { bass: '#00aaff', mid: '#66ddff', treble: '#ffffff', bg: '#05080c' },
+            toxic: { bass: '#00ff00', mid: '#88ff00', treble: '#ffff00', bg: '#050805' },
+            vapor: { bass: '#ff00ff', mid: '#cc00ff', treble: '#00ffff', bg: '#050508' }
         };
         
-        // Canvas
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         
@@ -579,11 +485,9 @@
         window.addEventListener('resize', resize);
         resize();
         
-        // Mic click handler
+        // === AUDIO ===
         async function handleMicClick() {
             const btn = document.getElementById('startBtn');
-            const note = document.getElementById('startNote');
-            
             btn.textContent = 'Requesting...';
             btn.disabled = true;
             
@@ -591,34 +495,64 @@
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 btn.textContent = 'Setting up...';
                 
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                analyser = audioContext.createAnalyser();
-                analyser.fftSize = 512;
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 1024; // Higher resolution
                 analyser.smoothingTimeConstant = smoothing;
                 
-                const source = audioContext.createMediaStreamSource(stream);
+                const source = audioCtx.createMediaStreamSource(stream);
                 source.connect(analyser);
                 
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
                 
-                // Hide start screen
                 document.getElementById('startScreen').classList.add('hidden');
-                document.getElementById('settingsBtn').classList.add('visible');
-                document.getElementById('vizSelector').classList.add('visible');
-                document.getElementById('infoBar').classList.add('visible');
+                document.querySelectorAll('.ui-element').forEach(el => el.classList.add('visible'));
                 
                 isStarted = true;
-                animate();
+                requestAnimationFrame(animate);
                 
             } catch (err) {
                 btn.disabled = false;
                 btn.textContent = 'Retry Connection';
                 btn.classList.add('error');
-                note.textContent = 'Error: ' + err.message + ' — Please allow microphone access and try again';
+                document.getElementById('startNote').textContent = err.message === 'Permission denied' 
+                    ? 'Please allow microphone access in browser settings' 
+                    : 'Error: ' + err.message;
             }
         }
         
-        // Build theme grid
+        function getBands() {
+            if (!analyser) return { bass: 0, mid: 0, treble: 0 };
+            
+            analyser.getByteFrequencyData(dataArray);
+            const len = dataArray.length;
+            
+            // Bass: 0-10%, Mid: 10-50%, Treble: 50-100%
+            const bassEnd = Math.floor(len * 0.1);
+            const midEnd = Math.floor(len * 0.5);
+            
+            let bassSum = 0, midSum = 0, trebleSum = 0;
+            for (let i = 0; i < bassEnd; i++) bassSum += dataArray[i];
+            for (let i = bassEnd; i < midEnd; i++) midSum += dataArray[i];
+            for (let i = midEnd; i < len; i++) trebleSum += dataArray[i];
+            
+            let bass = (bassSum / bassEnd / 255) * (sensitivity / 100);
+            let mid = (midSum / (midEnd - bassEnd) / 255) * (sensitivity / 100);
+            let treble = (trebleSum / (len - midEnd) / 255) * (sensitivity / 100) * (trebleBoost / 100);
+            
+            // Smoothing
+            bass = bass * (1 - smoothing) + (window._lastBass || bass) * smoothing;
+            mid = mid * (1 - smoothing) + (window._lastMid || mid) * smoothing;
+            treble = treble * (1 - smoothing) + (window._lastTreble || treble) * smoothing;
+            
+            window._lastBass = bass;
+            window._lastMid = mid;
+            window._lastTreble = treble;
+            
+            return { bass, mid, treble };
+        }
+        
+        // === THEMES ===
         Object.entries(themes).forEach(([key, theme]) => {
             const div = document.createElement('div');
             div.className = 'theme-option' + (key === currentTheme ? ' active' : '');
@@ -638,10 +572,10 @@
             });
         }
         
-        // Settings
+        // === SETTINGS ===
         function updateSetting(name, value) {
-            const displayValue = document.getElementById(name + 'Value');
-            displayValue.textContent = value + '%';
+            const display = document.getElementById(name + 'Val');
+            display.textContent = value + '%';
             
             switch(name) {
                 case 'sensitivity': sensitivity = parseInt(value); break;
@@ -649,9 +583,10 @@
                     smoothing = parseInt(value) / 100;
                     if (analyser) analyser.smoothingTimeConstant = smoothing;
                     break;
-                case 'particleSize': particleSize = parseInt(value) / 100; break;
-                case 'particleSpeed': particleSpeed = parseInt(value) / 100; break;
-                case 'trailLength': trailLength = 1 - (parseInt(value) / 100); break;
+                case 'trebleBoost': trebleBoost = parseInt(value); break;
+                case 'speed': speed = parseInt(value) / 100; break;
+                case 'intensity': intensity = parseInt(value) / 100; break;
+                case 'trail': trailAmount = 1 - (parseInt(value) / 100); break;
             }
         }
         
@@ -660,10 +595,9 @@
             if (name === 'mirror') {
                 mirrorMode = !mirrorMode;
                 el.classList.toggle('active', mirrorMode);
-            } else if (name === 'fps') {
-                showFps = !showFps;
-                el.classList.toggle('active', showFps);
-                document.getElementById('fpsCounter').classList.toggle('visible', showFps);
+            } else if (name === 'rotate') {
+                autoRotate = !autoRotate;
+                el.classList.toggle('active', autoRotate);
             }
         }
         
@@ -679,218 +613,368 @@
             });
         }
         
-        // Audio analysis
-        function getBands() {
-            if (!analyser) return { bass: 0, mid: 0, treble: 0 };
-            
-            analyser.getByteFrequencyData(dataArray);
-            const len = dataArray.length;
-            const bassEnd = Math.floor(len * 0.1);
-            const midEnd = Math.floor(len * 0.5);
-            
-            let bassSum = 0, midSum = 0, trebleSum = 0;
-            for (let i = 0; i < bassEnd; i++) bassSum += dataArray[i];
-            for (let i = bassEnd; i < midEnd; i++) midSum += dataArray[i];
-            for (let i = midEnd; i < len; i++) trebleSum += dataArray[i];
-            
-            let bass = (bassSum / bassEnd / 255) * (sensitivity / 100);
-            let mid = (midSum / (midEnd - bassEnd) / 255) * (sensitivity / 100);
-            let treble = (trebleSum / (len - midEnd) / 255) * (sensitivity / 100);
-            
-            bass = lastBands.bass * smoothing + bass * (1 - smoothing);
-            mid = lastBands.mid * smoothing + mid * (1 - smoothing);
-            treble = lastBands.treble * smoothing + treble * (1 - smoothing);
-            
-            lastBands = { bass, mid, treble };
-            return { bass, mid, treble };
-        }
+        // === VISUALIZERS ===
         
-        // Visualizers
-        function drawParticles(bands) {
-            const t = themes[currentTheme];
-            const count = Math.floor(bands.bass * 40);
-            
-            for (let i = 0; i < count; i++) {
-                let x = Math.random() * canvas.width;
-                const y = canvas.height / 2 + (Math.random() - 0.5) * canvas.height * 0.6;
-                const color = Math.random() < 0.33 ? t.bass : Math.random() < 0.5 ? t.mid : t.treble;
-                const size = (Math.random() * 3 + 1) * particleSize;
-                const life = 1;
-                
-                ctx.globalAlpha = life;
-                ctx.fillStyle = color;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = color;
-                ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawWaves(bands) {
-            const t = themes[currentTheme];
-            const time = Date.now() * 0.001;
-            
-            // Bass
-            ctx.beginPath();
-            ctx.strokeStyle = t.bass;
-            ctx.lineWidth = (2 + bands.bass * 8) * particleSize;
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = t.bass;
-            
-            for (let x = 0; x < canvas.width; x++) {
-                const y = canvas.height * 0.35 + Math.sin(x * 0.008 + time * 2) * 60 * bands.bass + Math.sin(x * 0.015 + time * 3) * 30 * bands.mid;
-                if (x === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-            
-            // Mid
-            ctx.beginPath();
-            ctx.strokeStyle = t.mid;
-            ctx.lineWidth = (2 + bands.mid * 6) * particleSize;
-            ctx.shadowColor = t.mid;
-            for (let x = 0; x < canvas.width; x++) {
-                const y = canvas.height * 0.5 + Math.sin(x * 0.012 + time * 2.5) * 50 * bands.mid + Math.sin(x * 0.025 + time * 4) * 25 * bands.treble;
-                if (x === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-            
-            // Treble
-            ctx.beginPath();
-            ctx.strokeStyle = t.treble;
-            ctx.lineWidth = (1 + bands.treble * 4) * particleSize;
-            ctx.shadowColor = t.treble;
-            for (let x = 0; x < canvas.width; x++) {
-                const y = canvas.height * 0.65 + Math.sin(x * 0.02 + time * 3) * 40 * bands.treble + Math.sin(x * 0.04 + time * 5) * 15 * bands.bass;
-                if (x === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawRings(bands) {
+        // STUNNING PORTAL
+        function drawPortal(bands) {
             const t = themes[currentTheme];
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            const maxRadius = Math.min(canvas.width, canvas.height) * 0.4;
-            const bassRadius = maxRadius * 0.2 + bands.bass * maxRadius * 0.5;
+            const maxR = Math.min(canvas.width, canvas.height) * 0.42;
+            const timeSpeed = time * speed * 0.02;
             
-            ctx.beginPath();
-            ctx.strokeStyle = t.bass;
-            ctx.lineWidth = (3 + bands.bass * 12) * particleSize;
-            ctx.shadowBlur = 40;
-            ctx.shadowColor = t.bass;
-            ctx.arc(cx, cy, bassRadius, 0, Math.PI * 2);
-            ctx.stroke();
-            
-            // Sparkles
-            ctx.globalAlpha = 1;
-            for (let i = 0; i < Math.floor(bands.treble * 30); i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const dist = bassRadius + Math.random() * maxRadius * 0.5;
-                const x = cx + Math.cos(angle) * dist;
-                const y = cy + Math.sin(angle) * dist;
-                ctx.fillStyle = t.treble;
-                ctx.shadowBlur = 15;
-                ctx.beginPath();
-                ctx.arc(x, y, 2 + Math.random() * 3, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawTerrain(bands) {
-            const t = themes[currentTheme];
-            const time = Date.now() * 0.001;
-            
-            ctx.beginPath();
-            ctx.moveTo(0, canvas.height);
-            
-            for (let x = 0; x < canvas.width; x++) {
-                const y = canvas.height * 0.6 - (Math.sin(x * 0.01 + time * 2) * 50 * bands.bass + Math.sin(x * 0.02 + time * 3) * 30 * bands.mid + Math.sin(x * 0.005 + time) * 20);
-                ctx.lineTo(x, y);
-            }
-            
-            ctx.lineTo(canvas.width, canvas.height);
-            ctx.closePath();
-            
-            const gradient = ctx.createLinearGradient(0, canvas.height * 0.4, 0, canvas.height);
-            gradient.addColorStop(0, t.treble);
-            gradient.addColorStop(0.5, t.mid);
-            gradient.addColorStop(1, t.bass);
-            
-            ctx.fillStyle = gradient;
-            ctx.shadowBlur = 30;
-            ctx.shadowColor = t.mid;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        }
-        
-        function drawFire(bands) {
-            const t = themes[currentTheme];
-            const fireHeight = canvas.height * 0.5 * (0.3 + bands.bass * 0.7);
-            const time = Date.now() * 0.001;
-            
-            for (let x = 0; x < canvas.width; x += 3) {
-                const flicker = Math.sin(x * 0.1 + time * 10) * 10;
-                const height = fireHeight + Math.sin(x * 0.03 + time * 5) * 30 * bands.mid + flicker;
+            // Outer glow rings
+            for (let i = 5; i >= 0; i--) {
+                const radius = maxR * (0.5 + i * 0.12) + bands.bass * maxR * 0.3;
+                const alpha = (0.15 - i * 0.02) * intensity;
                 
-                const gradient = ctx.createLinearGradient(0, canvas.height, 0, canvas.height - height);
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = t.bass;
+                ctx.globalAlpha = alpha;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = t.bass;
+                ctx.stroke();
+            }
+            
+            // Swirling arms
+            const arms = 3;
+            for (let arm = 0; arm < arms; arm++) {
+                const armOffset = (arm / arms) * Math.PI * 2;
+                
+                ctx.beginPath();
+                for (let a = 0; a < Math.PI * 2; a += 0.05) {
+                    const spiral = a * 2 + timeSpeed * (mirrorMode ? -1 : 1);
+                    const r = (a / (Math.PI * 2)) * maxR * (0.3 + bands.mid * 0.7);
+                    const x = cx + Math.cos(spiral + armOffset) * r;
+                    const y = cy + Math.sin(spiral + armOffset) * r;
+                    if (a === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                
+                const gradient = ctx.createLinearGradient(cx - maxR, cy - maxR, cx + maxR, cy + maxR);
                 gradient.addColorStop(0, t.bass);
                 gradient.addColorStop(0.5, t.mid);
-                gradient.addColorStop(1, t.treble + '00');
+                gradient.addColorStop(1, t.treble);
                 
-                ctx.fillStyle = gradient;
+                ctx.strokeStyle = gradient;
+                ctx.globalAlpha = 0.8 * intensity;
+                ctx.lineWidth = 3 + bands.bass * 5;
                 ctx.shadowBlur = 20;
                 ctx.shadowColor = t.mid;
-                ctx.fillRect(x, canvas.height - height, 3, height);
+                ctx.stroke();
             }
+            
+            // Core
+            const coreSize = 20 + bands.treble * 80;
+            const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreSize);
+            coreGradient.addColorStop(0, t.mid);
+            coreGradient.addColorStop(0.5, t.treble + '88');
+            coreGradient.addColorStop(1, t.treble + '00');
+            
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = coreGradient;
+            ctx.shadowBlur = 60;
+            ctx.shadowColor = t.mid;
+            ctx.beginPath();
+            ctx.arc(cx, cy, coreSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Treble sparkles
+            if (bands.treble > 0.1) {
+                for (let i = 0; i < Math.floor(bands.treble * 50); i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const dist = Math.random() * maxR * 0.9;
+                    const x = cx + Math.cos(angle) * dist;
+                    const y = cy + Math.sin(angle) * dist;
+                    const size = Math.random() * 3 + 1;
+                    
+                    ctx.fillStyle = t.treble;
+                    ctx.globalAlpha = Math.random() * 0.8;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = t.treble;
+                    ctx.beginPath();
+                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+            
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+        }
+        
+        // NEBULA
+        function drawNebula(bands) {
+            const t = themes[currentTheme];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const timeSpeed = time * speed * 0.01;
+            
+            // Background nebula clouds
+            for (let layer = 0; layer < 5; layer++) {
+                const offset = layer * 0.3;
+                
+                ctx.beginPath();
+                for (let y = 0; y < canvas.height; y += 5) {
+                    for (let x = 0; x < canvas.width; x += 5) {
+                        const nx = (x - cx) / canvas.width;
+                        const ny = (y - cy) / canvas.height;
+                        const dist = Math.sqrt(nx*nx + ny*ny);
+                        
+                        const noise = Math.sin(x * 0.01 + timeSpeed + offset) * 
+                                     Math.cos(y * 0.01 + timeSpeed * 0.7 + offset) *
+                                     Math.sin(dist * 5 - timeSpeed * 2);
+                        
+                        if (noise > 0.3) {
+                            const alpha = (noise - 0.3) * (1 - dist) * 0.3 * intensity;
+                            ctx.fillStyle = layer % 2 === 0 ? t.bass : t.mid;
+                            ctx.globalAlpha = alpha;
+                            ctx.fillRect(x, y, 5, 5);
+                        }
+                    }
+                }
+            }
+            
+            // Central glow
+            const glowSize = 200 + bands.mid * 300;
+            const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
+            glow.addColorStop(0, t.mid + '44');
+            glow.addColorStop(0.5, t.treble + '22');
+            glow.addColorStop(1, t.bass + '00');
+            
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Particles
+            for (let i = 0; i < Math.floor(bands.bass * 30); i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const dist = Math.random() * Math.min(canvas.width, canvas.height) * 0.4;
+                const x = cx + Math.cos(angle + timeSpeed) * dist;
+                const y = cy + Math.sin(angle + timeSpeed) * dist;
+                const size = Math.random() * 4 + 2;
+                
+                ctx.fillStyle = Math.random() > 0.5 ? t.bass : t.treble;
+                ctx.globalAlpha = 0.7;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = t.mid;
+                ctx.beginPath();
+                ctx.arc(x, y, size * intensity, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+        }
+        
+        // PULSES
+        function drawPulses(bands) {
+            const t = themes[currentTheme];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const maxR = Math.min(canvas.width, canvas.height) * 0.45;
+            const timeSpeed = time * speed * 0.03;
+            
+            // Expanding rings
+            const numRings = 8;
+            for (let i = 0; i < numRings; i++) {
+                const phase = ((timeSpeed + i * 0.5) % 3) / 3;
+                const radius = phase * maxR;
+                const alpha = (1 - phase) * 0.6;
+                
+                const ringWidth = 2 + bands.bass * 10 + bands.mid * 5;
+                
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = i % 2 === 0 ? t.bass : t.mid;
+                ctx.globalAlpha = alpha * intensity;
+                ctx.lineWidth = ringWidth;
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = i % 2 === 0 ? t.bass : t.mid;
+                ctx.stroke();
+                
+                // Inner ring
+                if (phase < 0.7) {
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, radius * 0.7, 0, Math.PI * 2);
+                    ctx.strokeStyle = t.treble;
+                    ctx.globalAlpha = alpha * 0.5 * intensity;
+                    ctx.lineWidth = ringWidth * 0.5;
+                    ctx.stroke();
+                }
+            }
+            
+            // Central burst on bass hit
+            if (bands.bass > 0.5) {
+                const burstSize = 50 + bands.bass * 150;
+                const burst = ctx.createRadialGradient(cx, cy, 0, cx, cy, burstSize);
+                burst.addColorStop(0, t.mid + 'cc');
+                burst.addColorStop(0.5, t.treble + '44');
+                burst.addColorStop(1, t.bass + '00');
+                
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = burst;
+                ctx.shadowBlur = 50;
+                ctx.shadowColor = t.mid;
+                ctx.beginPath();
+                ctx.arc(cx, cy, burstSize, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+        }
+        
+        // CRYSTAL SHARDS
+        function drawShards(bands) {
+            const t = themes[currentTheme];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const timeSpeed = time * speed * 0.015;
+            
+            const numShards = 12;
+            for (let i = 0; i < numShards; i++) {
+                const angle = (i / numShards) * Math.PI * 2 + timeSpeed;
+                const length = 150 + Math.sin(timeSpeed * 3 + i) * 50 + bands.mid * 200;
+                const width = 15 + bands.bass * 20;
+                
+                const x1 = cx + Math.cos(angle) * 30;
+                const y1 = cy + Math.sin(angle) * 30;
+                const x2 = cx + Math.cos(angle) * length;
+                const y2 = cy + Math.sin(angle) * length;
+                
+                // Perpendicular points for shard shape
+                const perpAngle = angle + Math.PI / 2;
+                const px1 = Math.cos(perpAngle) * width;
+                const py1 = Math.sin(perpAngle) * width;
+                
+                ctx.beginPath();
+                ctx.moveTo(x1 + px1 * 0.3, y1 + py1 * 0.3);
+                ctx.lineTo(x2 + px1, y2 + py1);
+                ctx.lineTo(x2 - px1, y2 - py1);
+                ctx.lineTo(x1 - px1 * 0.3, y1 - py1 * 0.3);
+                ctx.closePath();
+                
+                const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+                gradient.addColorStop(0, t.bass);
+                gradient.addColorStop(0.5, t.mid);
+                gradient.addColorStop(1, t.treble);
+                
+                ctx.fillStyle = gradient;
+                ctx.globalAlpha = 0.7 * intensity;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = t.mid;
+                ctx.fill();
+                
+                // Shard outline
+                ctx.strokeStyle = '#ffffff44';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+            
+            // Center orb
+            const orbSize = 25 + bands.treble * 50;
+            const orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbSize);
+            orb.addColorStop(0, '#ffffff');
+            orb.addColorStop(0.3, t.mid);
+            orb.addColorStop(1, t.treble + '00');
+            
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = orb;
+            ctx.beginPath();
+            ctx.arc(cx, cy, orbSize, 0, Math.PI * 2);
+            ctx.fill();
+            
             ctx.shadowBlur = 0;
         }
         
-        // Main loop
+        // WAVES
+        function drawWaves(bands) {
+            const t = themes[currentTheme];
+            const timeSpeed = time * speed * 0.02;
+            
+            // Multiple wave layers
+            const layers = [
+                { freq: bands.bass, color: t.bass, y: 0.3, amp: 80, speed: 2 },
+                { freq: bands.mid, color: t.mid, y: 0.5, amp: 60, speed: 3 },
+                { freq: bands.treble, color: t.treble, y: 0.7, amp: 40, speed: 4 }
+            ];
+            
+            layers.forEach((layer, idx) => {
+                ctx.beginPath();
+                
+                for (let x = 0; x <= canvas.width; x += 3) {
+                    const wave1 = Math.sin(x * 0.008 + timeSpeed * layer.speed) * layer.amp * layer.freq;
+                    const wave2 = Math.sin(x * 0.015 + timeSpeed * layer.speed * 1.5) * layer.amp * 0.5 * (bands.mid + bands.treble);
+                    const y = canvas.height * layer.y + wave1 + wave2;
+                    
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                
+                ctx.strokeStyle = layer.color;
+                ctx.lineWidth = 3 + layer.freq * 8;
+                ctx.globalAlpha = 0.8 * intensity;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = layer.color;
+                ctx.stroke();
+            });
+            
+            // Reflection
+            ctx.globalAlpha = 0.2 * intensity;
+            for (let x = 0; x <= canvas.width; x += 3) {
+                const wave1 = Math.sin(x * 0.008 + timeSpeed * 2) * bands.bass * 40;
+                const y = canvas.height * 0.8 + wave1;
+                ctx.fillStyle = themes[currentTheme].mid;
+                ctx.fillRect(x, y, 3, canvas.height * 0.2);
+            }
+            
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1;
+        }
+        
+        // === MAIN LOOP ===
         function animate() {
             if (!isStarted) return;
             requestAnimationFrame(animate);
             
-            // FPS
-            if (showFps) {
-                const fpsEl = document.getElementById('fpsCounter') || { textContent: '' };
-            }
+            time++;
             
-            // Trail
-            ctx.fillStyle = `rgba(5, 5, 8, ${trailLength})`;
+            // Trail/fade
+            ctx.fillStyle = `rgba(5, 5, 8, ${trailAmount})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             if (!analyser) return;
             
             const bands = getBands();
             
-            // Update UI bars
+            // Update bars
             document.getElementById('bassBar').style.width = (bands.bass * 100) + '%';
             document.getElementById('midBar').style.width = (bands.mid * 100) + '%';
             document.getElementById('trebleBar').style.width = (bands.treble * 100) + '%';
             
+            // Auto rotate mirror
+            if (autoRotate && currentViz === 'portal') {
+                mirrorMode = Math.sin(time * 0.01) > 0;
+            }
+            
             // Draw
             switch (currentViz) {
-                case 'particles': drawParticles(bands); break;
+                case 'portal': drawPortal(bands); break;
+                case 'nebula': drawNebula(bands); break;
+                case 'pulses': drawPulses(bands); break;
+                case 'shards': drawShards(bands); break;
                 case 'waves': drawWaves(bands); break;
-                case 'rings': drawRings(bands); break;
-                case 'terrain': drawTerrain(bands); break;
-                case 'fire': drawFire(bands); break;
             }
         }
         
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
+        // Keyboard
+        document.addEventListener('keydown', e => {
             if (e.key === 'Escape') toggleSettings();
             if (e.key === 's' || e.key === 'S') toggleSettings();
             if (e.key >= '1' && e.key <= '5') {
-                const vizs = ['particles', 'waves', 'rings', 'terrain', 'fire'];
+                const vizs = ['portal', 'nebula', 'pulses', 'shards', 'waves'];
                 setViz(vizs[parseInt(e.key) - 1]);
             }
         });
