@@ -828,8 +828,18 @@
         
         // Audio
         async function initAudio() {
+            startBtn.textContent = '🔄 Requesting microphone...';
+            
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                startBtn.textContent = '❌ Browser not supported';
+                errorMsg.classList.add('visible');
+                return;
+            }
+            
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                startBtn.textContent = '🔄 Setting up audio...';
+                
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 512;
@@ -849,9 +859,10 @@
                 animate();
             } catch (err) {
                 console.error('Audio error:', err);
-                startBtn.textContent = '❌ Access Denied';
+                startBtn.textContent = '❌ ' + (err.name === 'NotAllowedError' ? 'Access Denied' : err.message);
                 startBtn.style.opacity = '1';
                 errorMsg.classList.add('visible');
+                document.querySelector('.start-note').textContent = 'Please allow microphone access in browser settings';
             }
         }
         
