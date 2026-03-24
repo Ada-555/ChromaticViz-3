@@ -128,19 +128,27 @@
         
         .settings-btn:hover { background: rgba(255,255,255,0.1); }
         
-        /* Viz Selector */
+        /* Viz Selector - Horizontally scrollable */
         .viz-selector {
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             gap: 8px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 90vw;
+            padding: 10px 20px;
+            max-width: 95vw;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            justify-content: flex-start;
+        }
+        
+        .viz-selector::-webkit-scrollbar {
+            display: none;
         }
         
         .viz-btn {
+            flex-shrink: 0;
             padding: 12px 20px;
             font-family: inherit;
             font-size: 0.7rem;
@@ -159,31 +167,36 @@
         .viz-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .viz-btn.active { background: rgba(0,255,170,0.15); border-color: var(--mid); color: var(--mid); }
         
-        /* Info Bars */
+        /* Info Bars - Fixed above viz selector */
         .info-bar {
-            bottom: 100px;
+            bottom: 90px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 25px;
+            gap: 20px;
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         
         .info-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
         
         .info-label {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
             color: rgba(255,255,255,0.35);
         }
         
         .info-bar-fill {
-            width: 60px;
+            width: 40px;
             height: 3px;
             background: rgba(255,255,255,0.1);
             border-radius: 2px;
@@ -196,9 +209,9 @@
             transition: width 0.03s;
         }
         
-        .bass-fill { background: var(--bass); box-shadow: 0 0 8px var(--bass); }
-        .mid-fill { background: var(--mid); box-shadow: 0 0 8px var(--mid); }
-        .treble-fill { background: var(--treble); box-shadow: 0 0 8px var(--treble); }
+        .bass-fill { background: var(--bass); box-shadow: 0 0 6px var(--bass); }
+        .mid-fill { background: var(--mid); box-shadow: 0 0 6px var(--mid); }
+        .treble-fill { background: var(--treble); box-shadow: 0 0 6px var(--treble); }
         
         /* Settings Panel */
         .settings-panel {
@@ -316,7 +329,7 @@
         /* Mobile */
         @media (max-width: 600px) {
             .viz-selector { bottom: 20px; }
-            .info-bar { bottom: 90px; }
+            .info-bar { bottom: 75px; }
             .settings-panel { width: 100%; border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
         }
         
@@ -338,19 +351,6 @@
     
     <div class="ui-element settings-btn" id="settingsBtn" onclick="toggleSettings()">⚙️</div>
     
-    <div class="ui-element viz-selector" id="vizSelector">
-        <button class="viz-btn active" onclick="setViz('portal')">Portal</button>
-        <button class="viz-btn" onclick="setViz('nebula')">Nebula</button>
-        <button class="viz-btn" onclick="setViz('rings')">Rings</button>
-        <button class="viz-btn" onclick="setViz('pulses')">Pulses</button>
-        <button class="viz-btn" onclick="setViz('waves')">Waves</button>
-        <button class="viz-btn" onclick="setViz('shards')">Shards</button>
-        <button class="viz-btn" onclick="setViz('kaleido')">Kaleido</button>
-        <button class="viz-btn" onclick="setViz('tunnel')">Tunnel</button>
-        <button class="viz-btn" onclick="setViz('terrain')">Terrain</button>
-        <button class="viz-btn" onclick="setViz('fire')">Fire</button>
-    </div>
-    
     <div class="ui-element info-bar" id="infoBar">
         <div class="info-item">
             <span class="info-label">Bass</span>
@@ -364,6 +364,19 @@
             <span class="info-label">Treble</span>
             <div class="info-bar-fill"><div class="info-bar-fill-inner treble-fill" id="trebleBar" style="width:0%"></div></div>
         </div>
+    </div>
+    
+    <div class="ui-element viz-selector" id="vizSelector">
+        <button class="viz-btn active" onclick="setViz('portal')">Portal</button>
+        <button class="viz-btn" onclick="setViz('nebula')">Nebula</button>
+        <button class="viz-btn" onclick="setViz('rings')">Rings</button>
+        <button class="viz-btn" onclick="setViz('pulses')">Pulses</button>
+        <button class="viz-btn" onclick="setViz('waves')">Waves</button>
+        <button class="viz-btn" onclick="setViz('shards')">Shards</button>
+        <button class="viz-btn" onclick="setViz('kaleido')">Kaleido</button>
+        <button class="viz-btn" onclick="setViz('tunnel')">Tunnel</button>
+        <button class="viz-btn" onclick="setViz('terrain')">Terrain</button>
+        <button class="viz-btn" onclick="setViz('fire')">Fire</button>
     </div>
     
     <div class="overlay-backdrop" id="overlayBackdrop" onclick="toggleSettings()"></div>
@@ -418,7 +431,7 @@
         let sensitivity = 100, smoothing = 0.5, trebleBoost = 100;
         let speed = 1, intensity = 1, trailAmount = 0.7;
         let currentViz = 'portal', currentTheme = 'cosmic', isStarted = false;
-        let time = 0, rotation = 0;
+        let time = 0;
         
         // Themes
         const themes = {
@@ -561,36 +574,39 @@
         
         // === VISUALIZERS ===
         
-        // 1. PORTAL - Swirling cosmic wormhole
+        // 1. PORTAL - Enhanced outer rings
         function drawPortal(bands) {
             const t = themes[currentTheme];
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            const maxR = Math.min(canvas.width, canvas.height) * 0.42;
-            const timeSpeed = time * speed * 0.02;
+            const maxR = Math.min(canvas.width, canvas.height) * 0.45;
+            const timeSpeed = time * speed * 0.015;
             
-            // Outer glow rings
-            for (let i = 5; i >= 0; i--) {
-                const radius = maxR * (0.5 + i * 0.12) + bands.bass * maxR * 0.3;
+            // Strong outer bass halos - more visible, thicker
+            const numHalos = 4;
+            for (let i = 0; i < numHalos; i++) {
+                const haloRadius = maxR * (0.85 + i * 0.08) + bands.bass * maxR * 0.25;
+                const pulseOffset = Math.sin(timeSpeed * 2 + i) * 10 * bands.bass;
+                
                 ctx.beginPath();
-                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.arc(cx, cy, haloRadius + pulseOffset, 0, Math.PI * 2);
                 ctx.strokeStyle = t.bass;
-                ctx.globalAlpha = (0.12 - i * 0.015) * intensity;
-                ctx.lineWidth = 2;
+                ctx.globalAlpha = (0.4 - i * 0.06) * intensity;
+                ctx.lineWidth = 6 - i * 0.5;
                 ctx.shadowBlur = 30;
                 ctx.shadowColor = t.bass;
                 ctx.stroke();
             }
             
             // Swirling arms
-            const arms = 3;
+            const arms = 4;
             for (let arm = 0; arm < arms; arm++) {
                 const armOffset = (arm / arms) * Math.PI * 2;
                 
                 ctx.beginPath();
-                for (let a = 0; a < Math.PI * 2; a += 0.05) {
-                    const spiral = a * 2 + timeSpeed;
-                    const r = (a / (Math.PI * 2)) * maxR * (0.3 + bands.mid * 0.7);
+                for (let a = 0; a < Math.PI * 2; a += 0.04) {
+                    const spiral = a * 2.5 + timeSpeed;
+                    const r = (a / (Math.PI * 2)) * maxR * (0.25 + bands.mid * 0.75);
                     const x = cx + Math.cos(spiral + armOffset) * r;
                     const y = cy + Math.sin(spiral + armOffset) * r;
                     if (a === 0) ctx.moveTo(x, y);
@@ -603,40 +619,40 @@
                 gradient.addColorStop(1, t.treble);
                 
                 ctx.strokeStyle = gradient;
-                ctx.globalAlpha = 0.8 * intensity;
-                ctx.lineWidth = 2 + bands.bass * 4;
-                ctx.shadowBlur = 20;
+                ctx.globalAlpha = 0.85 * intensity;
+                ctx.lineWidth = 3 + bands.bass * 5;
+                ctx.shadowBlur = 25;
                 ctx.shadowColor = t.mid;
                 ctx.stroke();
             }
             
-            // Core
-            const coreSize = 20 + bands.treble * 80;
+            // Core glow
+            const coreSize = 25 + bands.treble * 100;
             const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreSize);
             coreGradient.addColorStop(0, t.mid);
-            coreGradient.addColorStop(0.5, t.treble + '88');
+            coreGradient.addColorStop(0.4, t.treble + 'cc');
             coreGradient.addColorStop(1, t.treble + '00');
             
             ctx.globalAlpha = 1;
             ctx.fillStyle = coreGradient;
-            ctx.shadowBlur = 60;
+            ctx.shadowBlur = 80;
             ctx.shadowColor = t.mid;
             ctx.beginPath();
             ctx.arc(cx, cy, coreSize, 0, Math.PI * 2);
             ctx.fill();
             
             // Treble sparkles
-            if (bands.treble > 0.1) {
-                for (let i = 0; i < Math.floor(bands.treble * 50); i++) {
+            if (bands.treble > 0.05) {
+                for (let i = 0; i < Math.floor(bands.treble * 60); i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const dist = Math.random() * maxR * 0.9;
+                    const dist = Math.random() * maxR * 0.85;
                     const x = cx + Math.cos(angle) * dist;
                     const y = cy + Math.sin(angle) * dist;
-                    const size = Math.random() * 3 + 1;
+                    const size = Math.random() * 4 + 1;
                     
                     ctx.fillStyle = t.treble;
-                    ctx.globalAlpha = Math.random() * 0.8;
-                    ctx.shadowBlur = 10;
+                    ctx.globalAlpha = Math.random() * 0.9;
+                    ctx.shadowBlur = 12;
                     ctx.shadowColor = t.treble;
                     ctx.beginPath();
                     ctx.arc(x, y, size, 0, Math.PI * 2);
@@ -648,14 +664,13 @@
             ctx.globalAlpha = 1;
         }
         
-        // 2. NEBULA - Procedural cloud formations
+        // 2. NEBULA - Cloud formations
         function drawNebula(bands) {
             const t = themes[currentTheme];
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
             const timeSpeed = time * speed * 0.01;
             
-            // Background nebula clouds
             for (let layer = 0; layer < 4; layer++) {
                 const offset = layer * 0.3;
                 
@@ -679,7 +694,6 @@
                 }
             }
             
-            // Central glow
             const glowSize = 200 + bands.mid * 300;
             const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
             glow.addColorStop(0, t.mid + '44');
@@ -690,20 +704,18 @@
             ctx.fillStyle = glow;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Particles
             for (let i = 0; i < Math.floor(bands.bass * 30); i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const dist = Math.random() * Math.min(canvas.width, canvas.height) * 0.4;
                 const x = cx + Math.cos(angle + timeSpeed) * dist;
                 const y = cy + Math.sin(angle + timeSpeed) * dist;
-                const size = Math.random() * 4 + 2;
                 
                 ctx.fillStyle = Math.random() > 0.5 ? t.bass : t.treble;
                 ctx.globalAlpha = 0.7;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = t.mid;
                 ctx.beginPath();
-                ctx.arc(x, y, size * intensity, 0, Math.PI * 2);
+                ctx.arc(x, y, (Math.random() * 4 + 2) * intensity, 0, Math.PI * 2);
                 ctx.fill();
             }
             
@@ -711,7 +723,7 @@
             ctx.globalAlpha = 1;
         }
         
-        // 3. RINGS - Classic circular rings
+        // 3. RINGS - Clean concentric circles
         function drawRings(bands) {
             const t = themes[currentTheme];
             const cx = canvas.width / 2;
@@ -719,14 +731,12 @@
             const maxR = Math.min(canvas.width, canvas.height) * 0.42;
             const timeSpeed = time * speed * 0.02;
             
-            // Multiple expanding rings
             const numRings = 6;
             for (let i = 0; i < numRings; i++) {
                 const phase = ((timeSpeed * 0.8 + i * 0.8) % 2.5) / 2.5;
                 const radius = phase * maxR;
                 const alpha = (1 - phase) * 0.7;
                 
-                // Bass ring
                 ctx.beginPath();
                 ctx.arc(cx, cy, radius, 0, Math.PI * 2);
                 ctx.strokeStyle = t.bass;
@@ -736,7 +746,6 @@
                 ctx.shadowColor = t.bass;
                 ctx.stroke();
                 
-                // Mid ring (slightly smaller, offset)
                 const midRadius = radius * 0.75;
                 if (midRadius > 10) {
                     ctx.beginPath();
@@ -749,7 +758,6 @@
                 }
             }
             
-            // Central pulsing orb
             const orbSize = 15 + bands.treble * 60;
             const orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbSize);
             orb.addColorStop(0, t.mid);
@@ -764,7 +772,6 @@
             ctx.arc(cx, cy, orbSize, 0, Math.PI * 2);
             ctx.fill();
             
-            // Treble sparkles around center
             for (let i = 0; i < Math.floor(bands.treble * 40); i++) {
                 const angle = Math.random() * Math.PI * 2;
                 const dist = 30 + Math.random() * 80;
@@ -783,7 +790,7 @@
             ctx.globalAlpha = 1;
         }
         
-        // 4. PULSES - Expanding concentric rings
+        // 4. PULSES - Expanding rings
         function drawPulses(bands) {
             const t = themes[currentTheme];
             const cx = canvas.width / 2;
@@ -797,29 +804,25 @@
                 const radius = phase * maxR;
                 const alpha = (1 - phase) * 0.6;
                 
-                const ringWidth = 2 + bands.bass * 8 + bands.mid * 4;
-                
                 ctx.beginPath();
                 ctx.arc(cx, cy, radius, 0, Math.PI * 2);
                 ctx.strokeStyle = i % 2 === 0 ? t.bass : t.mid;
                 ctx.globalAlpha = alpha * intensity;
-                ctx.lineWidth = ringWidth;
+                ctx.lineWidth = 2 + bands.bass * 8 + bands.mid * 4;
                 ctx.shadowBlur = 25;
                 ctx.shadowColor = i % 2 === 0 ? t.bass : t.mid;
                 ctx.stroke();
                 
-                // Inner treble ring
                 if (phase < 0.6) {
                     ctx.beginPath();
                     ctx.arc(cx, cy, radius * 0.6, 0, Math.PI * 2);
                     ctx.strokeStyle = t.treble;
                     ctx.globalAlpha = alpha * 0.4 * intensity;
-                    ctx.lineWidth = ringWidth * 0.4;
+                    ctx.lineWidth = (2 + bands.bass * 8 + bands.mid * 4) * 0.4;
                     ctx.stroke();
                 }
             }
             
-            // Central burst
             if (bands.bass > 0.4) {
                 const burstSize = 40 + bands.bass * 120;
                 const burst = ctx.createRadialGradient(cx, cy, 0, cx, cy, burstSize);
@@ -840,15 +843,15 @@
             ctx.globalAlpha = 1;
         }
         
-        // 5. WAVES - Clean triple wave layers
+        // 5. WAVES - Clean triple waves
         function drawWaves(bands) {
             const t = themes[currentTheme];
             const timeSpeed = time * speed * 0.025;
             
             const layers = [
-                { freq: bands.bass, color: t.bass, y: 0.35, amp: 60, speed: 1.5, width: 2 },
-                { freq: bands.mid, color: t.mid, y: 0.5, amp: 50, speed: 2.2, width: 2 },
-                { freq: bands.treble, color: t.treble, y: 0.65, amp: 35, speed: 3.5, width: 1.5 }
+                { freq: bands.bass, color: t.bass, y: 0.35, amp: 60, speed: 1.5, lw: 2 },
+                { freq: bands.mid, color: t.mid, y: 0.5, amp: 50, speed: 2.2, lw: 2 },
+                { freq: bands.treble, color: t.treble, y: 0.65, amp: 35, speed: 3.5, lw: 1.5 }
             ];
             
             layers.forEach(layer => {
@@ -864,7 +867,7 @@
                 }
                 
                 ctx.strokeStyle = layer.color;
-                ctx.lineWidth = layer.width + layer.freq * 5;
+                ctx.lineWidth = layer.lw + layer.freq * 5;
                 ctx.globalAlpha = 0.8 * intensity;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = layer.color;
@@ -875,162 +878,255 @@
             ctx.globalAlpha = 1;
         }
         
-        // 6. SHARDS - Radiating crystal formations
+        // 6. SHARDS - Unique crystal spikes radiating outward
         function drawShards(bands) {
             const t = themes[currentTheme];
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            const timeSpeed = time * speed * 0.015;
+            const timeSpeed = time * speed * 0.012;
             
-            const numShards = 12;
+            const numShards = 16;
             for (let i = 0; i < numShards; i++) {
                 const angle = (i / numShards) * Math.PI * 2 + timeSpeed;
-                const length = 120 + Math.sin(timeSpeed * 2 + i) * 40 + bands.mid * 180;
-                const width = 12 + bands.bass * 15;
                 
-                const x1 = cx + Math.cos(angle) * 25;
-                const y1 = cy + Math.sin(angle) * 25;
-                const x2 = cx + Math.cos(angle) * length;
-                const y2 = cy + Math.sin(angle) * length;
+                // Main spike
+                const baseWidth = 8 + bands.bass * 12;
+                const tipWidth = 2 + bands.mid * 4;
+                const length = 100 + Math.sin(timeSpeed * 3 + i * 0.5) * 50 + bands.bass * 200;
                 
                 const perpAngle = angle + Math.PI / 2;
-                const px1 = Math.cos(perpAngle) * width * 0.3;
-                const py1 = Math.sin(perpAngle) * width * 0.3;
-                const px2 = Math.cos(perpAngle) * width;
-                const py2 = Math.sin(perpAngle) * width;
+                const bx = Math.cos(angle) * 40;
+                const by = Math.sin(angle) * 40;
+                const tx = Math.cos(angle) * (40 + length);
+                const ty = Math.sin(angle) * (40 + length);
+                
+                const px1 = Math.cos(perpAngle) * baseWidth;
+                const py1 = Math.sin(perpAngle) * baseWidth;
+                const px2 = Math.cos(perpAngle) * tipWidth;
+                const py2 = Math.sin(perpAngle) * tipWidth;
                 
                 ctx.beginPath();
-                ctx.moveTo(x1 + px1, y1 + py1);
-                ctx.lineTo(x2 + px2, y2 + py2);
-                ctx.lineTo(x2 - px2, y2 - py2);
-                ctx.lineTo(x1 - px1, y1 - py1);
+                ctx.moveTo(bx + px1, by + py1);
+                ctx.lineTo(tx + px2, ty + py2);
+                ctx.lineTo(tx - px2, ty - py2);
+                ctx.lineTo(bx - px1, by - py1);
                 ctx.closePath();
                 
-                const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+                const gradient = ctx.createLinearGradient(bx, by, tx, ty);
                 gradient.addColorStop(0, t.bass);
-                gradient.addColorStop(0.5, t.mid);
+                gradient.addColorStop(0.6, t.mid);
                 gradient.addColorStop(1, t.treble);
                 
                 ctx.fillStyle = gradient;
-                ctx.globalAlpha = 0.7 * intensity;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = t.mid;
-                ctx.fill();
-                
-                ctx.strokeStyle = '#ffffff33';
-                ctx.lineWidth = 1;
-                ctx.stroke();
-            }
-            
-            // Center orb
-            const orbSize = 20 + bands.treble * 45;
-            const orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbSize);
-            orb.addColorStop(0, '#ffffff');
-            orb.addColorStop(0.3, t.mid);
-            orb.addColorStop(1, t.treble + '00');
-            
-            ctx.globalAlpha = 1;
-            ctx.fillStyle = orb;
-            ctx.beginPath();
-            ctx.arc(cx, cy, orbSize, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.shadowBlur = 0;
-        }
-        
-        // 7. KALEIDOSCOPE - Mirrored segments
-        function drawKaleido(bands) {
-            const t = themes[currentTheme];
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            const timeSpeed = time * speed * 0.02;
-            const segments = 8;
-            
-            for (let seg = 0; seg < segments; seg++) {
-                const angle = (seg / segments) * Math.PI * 2 + timeSpeed;
-                const nextAngle = ((seg + 1) / segments) * Math.PI * 2 + timeSpeed;
-                
-                ctx.save();
-                ctx.translate(cx, cy);
-                ctx.rotate(angle);
-                
-                // Draw segment
-                ctx.beginPath();
-                ctx.moveTo(30, 0);
-                ctx.lineTo(200 + bands.bass * 150, 0);
-                ctx.lineTo(200 + bands.mid * 120, 80 + bands.mid * 60);
-                ctx.lineTo(30, 80 + bands.treble * 40);
-                ctx.closePath();
-                
-                const gradient = ctx.createLinearGradient(30, 0, 200, 0);
-                gradient.addColorStop(0, t.bass);
-                gradient.addColorStop(0.5, t.mid);
-                gradient.addColorStop(1, t.treble);
-                
-                ctx.fillStyle = gradient;
-                ctx.globalAlpha = 0.6 * intensity;
+                ctx.globalAlpha = 0.75 * intensity;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = t.mid;
                 ctx.fill();
                 
-                ctx.restore();
+                // Inner glow line
+                ctx.beginPath();
+                ctx.moveTo(bx, by);
+                ctx.lineTo(tx, ty);
+                ctx.strokeStyle = '#ffffff66';
+                ctx.lineWidth = 1;
+                ctx.stroke();
             }
             
-            // Center glow
-            const orbSize = 30 + bands.treble * 50;
+            // Glowing orb core
+            const orbSize = 30 + bands.treble * 60;
             const orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbSize);
-            orb.addColorStop(0, t.mid);
+            orb.addColorStop(0, '#ffffff');
+            orb.addColorStop(0.2, t.mid);
+            orb.addColorStop(0.8, t.treble + '88');
             orb.addColorStop(1, t.treble + '00');
             
             ctx.globalAlpha = 1;
             ctx.fillStyle = orb;
+            ctx.shadowBlur = 50;
+            ctx.shadowColor = t.mid;
             ctx.beginPath();
             ctx.arc(cx, cy, orbSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.shadowBlur = 0;
+        }
+        
+        // 7. KALEIDOSCOPE - Trippy Alex Grey inspired mandala
+        function drawKaleido(bands) {
+            const t = themes[currentTheme];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const timeSpeed = time * speed * 0.018;
+            
+            // Multiple mandala layers with different rotations
+            const layers = [
+                { segments: 6, scale: 1.8, rotOffset: 0, speedMult: 1 },
+                { segments: 8, scale: 1.4, rotOffset: Math.PI/8, speedMult: -0.7 },
+                { segments: 12, scale: 1.0, rotOffset: Math.PI/12, speedMult: 0.5 },
+                { segments: 16, scale: 0.7, rotOffset: 0, speedMult: -0.3 }
+            ];
+            
+            layers.forEach((layer, layerIdx) => {
+                const segments = layer.segments;
+                const maxR = Math.min(canvas.width, canvas.height) * 0.35 * layer.scale;
+                const rot = timeSpeed * layer.speedMult + layer.rotOffset;
+                
+                for (let seg = 0; seg < segments; seg++) {
+                    const angle = (seg / segments) * Math.PI * 2 + rot;
+                    const nextAngle = ((seg + 0.5) / segments) * Math.PI * 2 + rot;
+                    
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(angle);
+                    
+                    // Complex shape per segment - eye/petal pattern
+                    ctx.beginPath();
+                    // Outer point
+                    ctx.moveTo(maxR * 0.3, 0);
+                    // Curve out to tip
+                    ctx.quadraticCurveTo(maxR * 0.6, -maxR * 0.15 * (1 + bands.bass), maxR, 0);
+                    // Inner curve back
+                    ctx.quadraticCurveTo(maxR * 0.6, maxR * 0.15 * (1 + bands.mid), maxR * 0.3, 0);
+                    
+                    const colors = [t.bass, t.mid, t.treble];
+                    const colorIdx = (seg + layerIdx) % 3;
+                    ctx.fillStyle = colors[colorIdx];
+                    ctx.globalAlpha = (0.5 - layerIdx * 0.08) * intensity;
+                    ctx.shadowBlur = 20;
+                    ctx.shadowColor = colors[colorIdx];
+                    ctx.fill();
+                    
+                    // Eye detail in center
+                    if (layerIdx === 2) {
+                        ctx.beginPath();
+                        ctx.arc(maxR * 0.5, 0, maxR * 0.12 + bands.treble * 10, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.globalAlpha = 0.3 + bands.treble * 0.3;
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                }
+            });
+            
+            // Central all-seeing eye
+            const eyeSize = 25 + bands.treble * 40;
+            
+            // Outer eye ring
+            ctx.beginPath();
+            ctx.arc(cx, cy, eyeSize * 1.5, 0, Math.PI * 2);
+            ctx.strokeStyle = t.bass;
+            ctx.globalAlpha = 0.5 * intensity;
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = t.bass;
+            ctx.stroke();
+            
+            // Eye white
+            ctx.beginPath();
+            ctx.arc(cx, cy, eyeSize, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.globalAlpha = 0.9;
+            ctx.shadowBlur = 30;
+            ctx.shadowColor = t.mid;
+            ctx.fill();
+            
+            // Pupil - dilates with bass
+            const pupilSize = eyeSize * (0.3 + bands.bass * 0.3);
+            const pupil = ctx.createRadialGradient(cx, cy, 0, cx, cy, pupilSize);
+            pupil.addColorStop(0, '#000000');
+            pupil.addColorStop(0.7, t.treble);
+            pupil.addColorStop(1, t.treble + '00');
+            ctx.fillStyle = pupil;
+            ctx.globalAlpha = 1;
+            ctx.beginPath();
+            ctx.arc(cx, cy, pupilSize, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Eye highlight
+            ctx.beginPath();
+            ctx.arc(cx - eyeSize * 0.25, cy - eyeSize * 0.25, eyeSize * 0.15, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.globalAlpha = 0.8;
             ctx.fill();
             
             ctx.shadowBlur = 0;
             ctx.globalAlpha = 1;
         }
         
-        // 8. TUNNEL - Flying through tunnel
+        // 8. TUNNEL - Enhanced depth with more interest
         function drawTunnel(bands) {
             const t = themes[currentTheme];
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            const timeSpeed = time * speed * 0.04;
+            const timeSpeed = time * speed * 0.035;
             
-            // Tunnel rings
-            const numRings = 20;
+            // Background glow
+            const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(canvas.width, canvas.height) * 0.5);
+            bgGlow.addColorStop(0, t.mid + '22');
+            bgGlow.addColorStop(0.5, t.treble + '11');
+            bgGlow.addColorStop(1, t.bass + '00');
+            ctx.fillStyle = bgGlow;
+            ctx.globalAlpha = 1;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Tunnel segments - more of them, varied
+            const numRings = 30;
             for (let i = 0; i < numRings; i++) {
                 const z = i / numRings;
                 const depth = 1 - z;
-                const radius = 50 + z * Math.min(canvas.width, canvas.height) * 0.5;
+                const baseRadius = 30 + z * Math.min(canvas.width, canvas.height) * 0.5;
                 
-                // Pulsing based on audio
-                const pulse = 1 + bands.mid * 0.3 * (1 - z);
+                // Pulsing with audio
+                const bassPulse = 1 + bands.bass * 0.4 * depth;
+                const midPulse = 1 + bands.mid * 0.2 * (1 - z * 0.5);
+                const radius = baseRadius * bassPulse * midPulse;
+                
+                // Alternate colors and add treble highlights
+                const isHighlight = (i % 3 === 0 && bands.treble > 0.2);
+                const color = i % 2 === 0 ? t.bass : (isHighlight ? t.treble : t.mid);
                 
                 ctx.beginPath();
-                ctx.arc(cx, cy, radius * pulse, 0, Math.PI * 2);
-                ctx.strokeStyle = i % 2 === 0 ? t.bass : t.mid;
-                ctx.globalAlpha = z * 0.7 * intensity;
-                ctx.lineWidth = 1 + bands.bass * 4 * depth;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = t.bass;
+                ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = color;
+                ctx.globalAlpha = z * 0.8 * intensity;
+                ctx.lineWidth = (1 + bands.bass * 5) * depth;
+                ctx.shadowBlur = isHighlight ? 20 : 10;
+                ctx.shadowColor = color;
                 ctx.stroke();
                 
-                // Treble highlights
-                if (bands.treble > 0.3 && i % 3 === 0) {
-                    ctx.beginPath();
-                    ctx.arc(cx, cy, radius * pulse * 0.95, 0, Math.PI * 2);
-                    ctx.strokeStyle = t.treble;
-                    ctx.globalAlpha = z * 0.5 * intensity;
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+                // Cross-hatch pattern for depth
+                if (i % 4 === 0 && depth > 0.3) {
+                    const innerR = radius * 0.7;
+                    for (let a = 0; a < 8; a++) {
+                        const angle = (a / 8) * Math.PI * 2 + timeSpeed;
+                        ctx.beginPath();
+                        ctx.moveTo(cx + Math.cos(angle) * innerR * 0.3, cy + Math.sin(angle) * innerR * 0.3);
+                        ctx.lineTo(cx + Math.cos(angle) * innerR, cy + Math.sin(angle) * innerR);
+                        ctx.strokeStyle = t.mid;
+                        ctx.globalAlpha = z * 0.3 * intensity;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
                 }
             }
             
+            // Central vortex
+            const vortexSize = 40 + bands.bass * 80;
+            for (let ring = 0; ring < 4; ring++) {
+                const r = vortexSize * (0.3 + ring * 0.25);
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, 0, Math.PI * 2);
+                ctx.strokeStyle = ring % 2 === 0 ? t.mid : t.treble;
+                ctx.globalAlpha = (0.8 - ring * 0.15) * intensity;
+                ctx.lineWidth = 2 + bands.treble * 4;
+                ctx.shadowBlur = 25;
+                ctx.shadowColor = t.mid;
+                ctx.stroke();
+            }
+            
             // Center glow
-            const centerSize = 30 + bands.treble * 80;
+            const centerSize = 20 + bands.treble * 50;
             const center = ctx.createRadialGradient(cx, cy, 0, cx, cy, centerSize);
             center.addColorStop(0, '#ffffff');
             center.addColorStop(0.3, t.mid);
@@ -1038,7 +1134,7 @@
             
             ctx.globalAlpha = 1;
             ctx.fillStyle = center;
-            ctx.shadowBlur = 40;
+            ctx.shadowBlur = 50;
             ctx.shadowColor = t.mid;
             ctx.beginPath();
             ctx.arc(cx, cy, centerSize, 0, Math.PI * 2);
@@ -1048,12 +1144,11 @@
             ctx.globalAlpha = 1;
         }
         
-        // 9. TERRAIN - Audio-reactive mountains
+        // 9. TERRAIN - Keep as is (perfect)
         function drawTerrain(bands) {
             const t = themes[currentTheme];
             const timeSpeed = time * speed * 0.015;
             
-            // Draw 3 mountain layers
             for (let layer = 0; layer < 3; layer++) {
                 const yBase = canvas.height * (0.5 + layer * 0.12);
                 const amp = 80 - layer * 15;
@@ -1089,7 +1184,7 @@
             ctx.globalAlpha = 1;
         }
         
-        // 10. FIRE - Flames from bass
+        // 10. FIRE - Bass-reactive flames
         function drawFire(bands) {
             const t = themes[currentTheme];
             const timeSpeed = time * speed * 0.03;
@@ -1114,17 +1209,15 @@
                 ctx.fillRect(x, baseHeight - height, 4, height);
             }
             
-            // Sparks
             if (bands.treble > 0.2) {
                 for (let i = 0; i < Math.floor(bands.treble * 20); i++) {
                     const x = Math.random() * canvas.width;
                     const y = baseHeight - Math.random() * maxFlameHeight * 0.8;
-                    const size = Math.random() * 3 + 1;
                     
                     ctx.fillStyle = t.treble;
                     ctx.globalAlpha = Math.random() * 0.7;
                     ctx.beginPath();
-                    ctx.arc(x, y, size, 0, Math.PI * 2);
+                    ctx.arc(x, y, Math.random() * 3 + 1, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
@@ -1139,9 +1232,7 @@
             requestAnimationFrame(animate);
             
             time++;
-            rotation += speed * 0.01;
             
-            // Trail/fade
             ctx.fillStyle = `rgba(5, 5, 8, ${trailAmount})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
@@ -1149,12 +1240,10 @@
             
             const bands = getBands();
             
-            // Update bars
             document.getElementById('bassBar').style.width = (bands.bass * 100) + '%';
             document.getElementById('midBar').style.width = (bands.mid * 100) + '%';
             document.getElementById('trebleBar').style.width = (bands.treble * 100) + '%';
             
-            // Draw
             switch (currentViz) {
                 case 'portal': drawPortal(bands); break;
                 case 'nebula': drawNebula(bands); break;
@@ -1169,7 +1258,6 @@
             }
         }
         
-        // Keyboard shortcuts
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape') toggleSettings();
             if (e.key === 's' || e.key === 'S') toggleSettings();
