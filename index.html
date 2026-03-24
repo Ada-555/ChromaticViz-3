@@ -6,92 +6,395 @@
     <title>Chromatic — Cosmic Portal Visualizer</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap');
+        
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        :root { --bass: #ff0066; --mid: #00ffaa; --treble: #6600ff; --bg: #050508; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); min-height: 100vh; overflow: hidden; color: #fff; }
+        
+        :root {
+            --bass: #ff0066;
+            --mid: #00ffaa;
+            --treble: #6600ff;
+            --bg: #050508;
+        }
+        
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            overflow: hidden;
+            color: #fff;
+        }
+        
         canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
-        .start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(ellipse at center, #0a0a15 0%, #050508 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.8s; }
+        
+        /* Start Screen */
+        .start-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, #0a0a15 0%, #050508 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.8s;
+        }
+        
         .start-screen.hidden { opacity: 0; pointer-events: none; }
-        .start-title { font-size: clamp(3rem, 12vw, 7rem); font-weight: 300; letter-spacing: 0.4em; margin-bottom: 5px; background: linear-gradient(135deg, var(--bass), var(--mid), var(--treble), var(--bass)); background-size: 300% 100%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 4s linear infinite; }
-        @keyframes shimmer { 0% { background-position: 0% 50%; } 100% { background-position: 300% 50%; } }
-        .start-subtitle { font-size: 0.85rem; color: rgba(255,255,255,0.35); letter-spacing: 0.4em; margin-bottom: 50px; text-transform: uppercase; }
-        #startBtn { padding: 20px 60px; font-family: inherit; font-size: 1rem; font-weight: 400; letter-spacing: 0.3em; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 50px; cursor: pointer; transition: all 0.4s; text-transform: uppercase; }
-        #startBtn:hover:not(:disabled) { background: rgba(255,255,255,0.05); border-color: var(--mid); box-shadow: 0 0 40px rgba(0,255,170,0.2); }
+        
+        .start-title {
+            font-size: clamp(3rem, 12vw, 7rem);
+            font-weight: 300;
+            letter-spacing: 0.4em;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, var(--bass), var(--mid), var(--treble), var(--bass));
+            background-size: 300% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+        
+        .start-subtitle {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: 0.4em;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+        }
+        
+        #startBtn {
+            padding: 20px 60px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 0.3em;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.4s;
+            text-transform: uppercase;
+        }
+        
+        #startBtn:hover:not(:disabled) {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--mid);
+            box-shadow: 0 0 40px rgba(0,255,170,0.2);
+        }
+        
         #startBtn:disabled { opacity: 0.4; cursor: not-allowed; }
         #startBtn.error { border-color: var(--bass); color: var(--bass); }
-        .start-note { margin-top: 20px; font-size: 0.7rem; color: rgba(255,255,255,0.25); text-align: center; max-width: 350px; line-height: 1.6; }
-        .top-bar { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 20px; z-index: 60; pointer-events: none; }
-        .top-bar > * { pointer-events: auto; }
-        .info-bar { display: flex; gap: 15px; padding: 10px 15px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-radius: 25px; border: 1px solid rgba(255,255,255,0.1); opacity: 0; transition: opacity 0.4s; }
-        .info-bar.visible { opacity: 1; }
-        .info-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-        .info-label { font-size: 0.5rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.35); }
-        .info-bar-fill { width: 35px; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; }
-        .info-bar-fill-inner { height: 100%; border-radius: 2px; transition: width 0.03s; }
+        
+        .start-note {
+            margin-top: 20px;
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.25);
+            text-align: center;
+            max-width: 350px;
+            line-height: 1.6;
+        }
+        
+        /* UI Elements */
+        .ui-element {
+            position: fixed;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .ui-element.visible { opacity: 1; }
+        
+        .settings-btn {
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+        }
+        
+        .settings-btn:hover { background: rgba(255,255,255,0.1); }
+        
+        /* Info Bars */
+        .info-bar {
+            bottom: 140px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            padding: 8px 20px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .info-label {
+            font-size: 0.55rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.35);
+        }
+        
+        .info-bar-fill {
+            width: 40px;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .info-bar-fill-inner {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.03s;
+        }
+        
         .bass-fill { background: var(--bass); box-shadow: 0 0 6px var(--bass); }
         .mid-fill { background: var(--mid); box-shadow: 0 0 6px var(--mid); }
         .treble-fill { background: var(--treble); box-shadow: 0 0 6px var(--treble); }
-        .control-buttons { display: flex; gap: 10px; }
-        .control-btn { width: 45px; height: 45px; background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #fff; transition: all 0.3s; opacity: 0; }
-        .control-btn.visible { opacity: 1; }
-        .control-btn:hover { background: rgba(255,255,255,0.1); }
-        .selectors-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 50; transition: opacity 0.4s, transform 0.4s; }
-        .selectors-container.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .selectors-container.hidden { opacity: 0; transform: translateX(-50%) translateY(20px); pointer-events: none; }
-        .selector-section { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        .selector-title { font-size: 0.55rem; letter-spacing: 0.25em; text-transform: uppercase; color: rgba(255,255,255,0.3); }
-        .selector-row { display: flex; gap: 6px; padding: 8px 12px; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); max-width: 95vw; overflow-x: auto; scroll-behavior: smooth; scrollbar-width: none; }
+        
+        /* Selectors Container */
+        .selectors-container {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        
+        .selectors-container.visible { opacity: 1; }
+        
+        .selector-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .selector-title {
+            font-size: 0.6rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.3);
+        }
+        
+        .selector-row {
+            display: flex;
+            gap: 6px;
+            padding: 6px 10px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            max-width: 95vw;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
         .selector-row::-webkit-scrollbar { display: none; }
-        .selector-btn { flex-shrink: 0; padding: 8px 14px; font-family: inherit; font-size: 0.6rem; letter-spacing: 0.08em; background: transparent; border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); border-radius: 15px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; white-space: nowrap; }
+        
+        .selector-btn {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            font-family: inherit;
+            font-size: 0.6rem;
+            letter-spacing: 0.08em;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.5);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        
         .selector-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
         .selector-btn.active { background: rgba(0,255,170,0.12); border-color: var(--mid); color: var(--mid); }
-        .toggle-indicator { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); padding: 10px 20px; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.15); border-radius: 20px; color: rgba(255,255,255,0.5); font-size: 0.7rem; letter-spacing: 0.1em; cursor: pointer; z-index: 50; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        .toggle-indicator.visible { opacity: 1; pointer-events: auto; }
-        .toggle-indicator:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .settings-panel { position: fixed; top: 0; right: 0; width: min(380px, 90vw); height: 100%; background: rgba(5,5,10,0.95); backdrop-filter: blur(30px); border-left: 1px solid rgba(255,255,255,0.08); z-index: 70; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto; padding: 35px 30px; }
+        
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 0; right: 0;
+            width: min(380px, 90vw);
+            height: 100%;
+            background: rgba(5,5,10,0.95);
+            backdrop-filter: blur(30px);
+            border-left: 1px solid rgba(255,255,255,0.08);
+            z-index: 60;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            padding: 35px 30px;
+        }
+        
         .settings-panel.open { transform: translateX(0); }
-        .settings-title { font-size: 1.4rem; font-weight: 600; letter-spacing: 0.1em; margin-bottom: 35px; display: flex; justify-content: space-between; align-items: center; }
-        .close-btn { width: 38px; height: 38px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; cursor: pointer; color: #fff; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; }
+        
+        .settings-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            margin-bottom: 35px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .close-btn {
+            width: 38px;
+            height: 38px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            color: #fff;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         .settings-section { margin-bottom: 30px; }
-        .settings-section-title { font-size: 0.65rem; letter-spacing: 0.2em; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 18px; }
+        
+        .settings-section-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            color: rgba(255,255,255,0.3);
+            text-transform: uppercase;
+            margin-bottom: 18px;
+        }
+        
         .slider-control { margin-bottom: 22px; }
-        .slider-label { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.85rem; }
+        
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+        }
+        
         .slider-value { color: var(--mid); font-weight: 600; }
-        input[type="range"] { width: 100%; height: 4px; -webkit-appearance: none; background: rgba(255,255,255,0.1); border-radius: 2px; outline: none; }
-        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; background: linear-gradient(135deg, var(--mid), var(--treble)); border-radius: 50%; cursor: pointer; box-shadow: 0 0 15px rgba(0,255,170,0.5); }
-        .theme-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .theme-option { aspect-ratio: 1; border-radius: 10px; cursor: pointer; border: 2px solid transparent; transition: all 0.3s; }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(135deg, var(--mid), var(--treble));
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0,255,170,0.5);
+        }
+        
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        
+        .theme-option {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
         .theme-option:hover { transform: scale(1.08); }
         .theme-option.active { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
-        .effects-toggles { display: flex; gap: 8px; margin-top: 10px; }
-        .effect-btn { flex: 1; padding: 8px 10px; font-family: inherit; font-size: 0.6rem; letter-spacing: 0.05em; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.5); border-radius: 12px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
-        .effect-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .effect-btn.active { background: rgba(0,255,170,0.15); border-color: var(--mid); color: var(--mid); }
-        .overlay-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 65; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        
+        /* Overlay */
+        .overlay-backdrop {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 55;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        
         .overlay-backdrop.visible { opacity: 1; pointer-events: auto; }
-        @media (max-width: 600px) { .selectors-container { bottom: 20px; } .settings-panel { width: 100%; border-left: none; border-top: 1px solid rgba(255,255,255,0.08); } }
+        
+        /* Mobile */
+        @media (max-width: 600px) {
+            .info-bar { bottom: 200px; }
+            .selectors-container { bottom: 20px; }
+            .settings-panel { width: 100%; border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
+        }
+        
+        @media (max-height: 500px) and (orientation: landscape) {
+            .selectors-container { top: 20px; bottom: auto; flex-direction: row; }
+            .info-bar { top: 80px; bottom: auto; }
+        }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
+    
     <div class="start-screen" id="startScreen">
         <h1 class="start-title">CHROMATIC</h1>
         <p class="start-subtitle">Cosmic Portal Visualizer</p>
         <button id="startBtn" onclick="handleMicClick()">Connect Microphone</button>
         <p class="start-note" id="startNote">Enable microphone access to transform your music into visual experiences</p>
     </div>
-    <div class="top-bar">
-        <div class="info-bar" id="infoBar">
-            <div class="info-item"><span class="info-label">Bass</span><div class="info-bar-fill"><div class="info-bar-fill-inner bass-fill" id="bassBar" style="width:0%"></div></div></div>
-            <div class="info-item"><span class="info-label">Mid</span><div class="info-bar-fill"><div class="info-bar-fill-inner mid-fill" id="midBar" style="width:0%"></div></div></div>
-            <div class="info-item"><span class="info-label">Treble</span><div class="info-bar-fill"><div class="info-bar-fill-inner treble-fill" id="trebleBar" style="width:0%"></div></div></div>
+    
+    <div class="ui-element settings-btn" id="settingsBtn" onclick="toggleSettings()">⚙️</div>
+    
+    <div class="ui-element info-bar" id="infoBar">
+        <div class="info-item">
+            <span class="info-label">Bass</span>
+            <div class="info-bar-fill"><div class="info-bar-fill-inner bass-fill" id="bassBar" style="width:0%"></div></div>
         </div>
-        <div class="control-buttons">
-            <button class="control-btn" id="fullscreenBtn" onclick="toggleFullscreen()">⛶</button>
-            <button class="control-btn" id="settingsBtn" onclick="toggleSettings()">⚙️</button>
+        <div class="info-item">
+            <span class="info-label">Mid</span>
+            <div class="info-bar-fill"><div class="info-bar-fill-inner mid-fill" id="midBar" style="width:0%"></div></div>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Treble</span>
+            <div class="info-bar-fill"><div class="info-bar-fill-inner treble-fill" id="trebleBar" style="width:0%"></div></div>
         </div>
     </div>
-    <div class="selectors-container" id="selectorsContainer">
+    
+    <div class="ui-element selectors-container" id="selectorsContainer">
         <div class="selector-section">
             <span class="selector-title">Visualizers</span>
             <div class="selector-row" id="vizSelector">
@@ -133,42 +436,44 @@
             </div>
         </div>
     </div>
-    <div class="toggle-indicator" id="toggleIndicator" onclick="showSelectors()">↑ Show Effects</div>
+    
     <div class="overlay-backdrop" id="overlayBackdrop" onclick="toggleSettings()"></div>
+    
     <div class="settings-panel" id="settingsPanel">
-        <div class="settings-title"><span>Settings</span><button class="close-btn" onclick="toggleSettings()">✕</button></div>
+        <div class="settings-title">
+            <span>Settings</span>
+            <button class="close-btn" onclick="toggleSettings()">✕</button>
+        </div>
+        
         <div class="settings-section">
             <div class="settings-section-title">Audio Response</div>
-            <div class="slider-control"><div class="slider-label"><span>Sensitivity</span><span class="slider-value" id="sensitivityVal">100%</span></div><input type="range" id="sensitivity" min="50" max="400" value="100" oninput="updateSetting('sensitivity', this.value)"></div>
-            <div class="slider-control"><div class="slider-label"><span>Smoothing</span><span class="slider-value" id="smoothingVal">50%</span></div><input type="range" id="smoothing" min="0" max="90" value="50" oninput="updateSetting('smoothing', this.value)"></div>
-            <div class="slider-control"><div class="slider-label"><span>Treble Boost</span><span class="slider-value" id="trebleBoostVal">100%</span></div><input type="range" id="trebleBoost" min="50" max="300" value="100" oninput="updateSetting('trebleBoost', this.value)"></div>
+            <div class="slider-control">
+                <div class="slider-label"><span>Sensitivity</span><span class="slider-value" id="sensitivityVal">100%</span></div>
+                <input type="range" id="sensitivity" min="50" max="400" value="100" oninput="updateSetting('sensitivity', this.value)">
+            </div>
+            <div class="slider-control">
+                <div class="slider-label"><span>Smoothing</span><span class="slider-value" id="smoothingVal">50%</span></div>
+                <input type="range" id="smoothing" min="0" max="90" value="50" oninput="updateSetting('smoothing', this.value)">
+            </div>
+            <div class="slider-control">
+                <div class="slider-label"><span>Treble Boost</span><span class="slider-value" id="trebleBoostVal">100%</span></div>
+                <input type="range" id="trebleBoost" min="50" max="300" value="100" oninput="updateSetting('trebleBoost', this.value)">
+            </div>
         </div>
+        
         <div class="settings-section">
             <div class="settings-section-title">Visual</div>
-            <div class="slider-control"><div class="slider-label"><span>Speed</span><span class="slider-value" id="speedVal">100%</span></div><input type="range" id="speed" min="20" max="300" value="100" oninput="updateSetting('speed', this.value)"></div>
-            <div class="slider-control"><div class="slider-label"><span>Intensity</span><span class="slider-value" id="intensityVal">100%</span></div><input type="range" id="intensity" min="20" max="200" value="100" oninput="updateSetting('intensity', this.value)"></div>
-            <div class="slider-control"><div class="slider-label"><span>Trails</span><span class="slider-value" id="trailVal">30%</span></div><input type="range" id="trail" min="0" max="95" value="30" oninput="updateSetting('trail', this.value)"></div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-section-title">Special Effects</div>
-            <div class="effects-toggles">
-                <button class="effect-btn" id="shakeBtn" onclick="toggleEffect('shake')">Shake</button>
-                <button class="effect-btn" id="chromaBtn" onclick="toggleEffect('chroma')">Chroma</button>
-                <button class="effect-btn" id="glowBtn" onclick="toggleEffect('glow')">Glow</button>
+            <div class="slider-control">
+                <div class="slider-label"><span>Speed</span><span class="slider-value" id="speedVal">100%</span></div>
+                <input type="range" id="speed" min="20" max="300" value="100" oninput="updateSetting('speed', this.value)">
             </div>
-            <div class="effects-toggles" style="margin-top:8px;">
-                <button class="effect-btn" id="flashBtn" onclick="toggleEffect('flash')">Flash</button>
-                <button class="effect-btn" id="cycleBtn" onclick="toggleEffect('cycle')">Cycle</button>
+            <div class="slider-control">
+                <div class="slider-label"><span>Intensity</span><span class="slider-value" id="intensityVal">100%</span></div>
+                <input type="range" id="intensity" min="20" max="200" value="100" oninput="updateSetting('intensity', this.value)">
             </div>
-        </div>
-        <div class="settings-section">
-            <div class="settings-section-title">Special Effects</div>
-            <div class="btn-group">
-                <button class="btn" id="shakeBtn" onclick="toggleEffect('shake')">Shake</button>
-                <button class="btn" id="chromaBtn" onclick="toggleEffect('chroma')">Chroma</button>
-                <button class="btn" id="glowBtn" onclick="toggleEffect('glow')">Glow</button>
-                <button class="btn" id="flashBtn" onclick="toggleEffect('flash')">Flash</button>
-                <button class="btn" id="cycleBtn" onclick="toggleEffect('cycle')">Cycle</button>
+            <div class="slider-control">
+                <div class="slider-label"><span>Trails</span><span class="slider-value" id="trailVal">30%</span></div>
+                <input type="range" id="trail" min="0" max="95" value="30" oninput="updateSetting('trail', this.value)">
             </div>
         </div>
         
@@ -177,16 +482,19 @@
             <div class="theme-grid" id="themeGrid"></div>
         </div>
     </div>
+
     <script>
+        // === STATE ===
         let audioCtx = null, analyser = null, dataArray = null;
         let sensitivity = 100, smoothing = 0.5, trebleBoost = 100;
         let speed = 1, intensity = 1, trailAmount = 0.7;
         let currentViz = 'portal', currentTheme = 'cosmic', currentBg = 'particles';
-        let isStarted = false, time = 0, selectorsVisible = true;
-        let effects = { shake: false, chroma: false, glow: false, flash: false, cycle: false };
-        let colorCycleOffset = 0, lastBassPeak = 0, flashTimer = 0, shakeOffset = { x: 0, y: 0 };
+        let isStarted = false, time = 0;
+        
+        // Background elements storage
         let bgParticles = [], bgStars = [], bgMatrix = [], bgBubbles = [], bgFireflies = [];
         
+        // Themes
         const themes = {
             cosmic: { bass: '#ff0066', mid: '#00ffaa', treble: '#6600ff', bg: '#050508' },
             fire: { bass: '#ff2200', mid: '#ff6600', treble: '#ffcc00', bg: '#080505' },
@@ -203,62 +511,142 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; initBackgroundElements(); }
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initBackgroundElements();
+        }
         window.addEventListener('resize', resize);
         resize();
         
         function initBackgroundElements() {
-            bgStars = []; for (let i = 0; i < Math.floor(canvas.width * canvas.height / 8000); i++) bgStars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 2 + 0.5, alpha: Math.random() * 0.5 + 0.2, twinkleSpeed: Math.random() * 0.02 + 0.01 });
-            bgParticles = []; for (let i = 0; i < Math.floor(canvas.width * canvas.height / 15000); i++) bgParticles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.5, vy: (Math.random() - 0.5) * 0.5, size: Math.random() * 3 + 1, alpha: Math.random() * 0.4 + 0.1 });
-            bgMatrix = []; const cols = Math.floor(canvas.width / 15); for (let i = 0; i < cols; i++) { bgMatrix.push({ y: Math.random() * canvas.height, speed: Math.random() * 3 + 2, chars: [] }); for (let j = 0; j < 20; j++) bgMatrix[i].chars.push(String.fromCharCode(0x30A0 + Math.random() * 96)); }
-            bgBubbles = []; for (let i = 0; i < 40; i++) bgBubbles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, size: Math.random() * 30 + 10, speed: Math.random() * 0.5 + 0.2, wobble: Math.random() * Math.PI * 2 });
-            bgFireflies = []; for (let i = 0; i < 50; i++) bgFireflies.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3, glow: Math.random(), glowSpeed: Math.random() * 0.05 + 0.02 });
+            // Stars
+            bgStars = [];
+            for (let i = 0; i < Math.floor(canvas.width * canvas.height / 8000); i++) {
+                bgStars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2 + 0.5,
+                    alpha: Math.random() * 0.5 + 0.2,
+                    twinkleSpeed: Math.random() * 0.02 + 0.01
+                });
+            }
+            
+            // Particles
+            bgParticles = [];
+            for (let i = 0; i < Math.floor(canvas.width * canvas.height / 15000); i++) {
+                bgParticles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    size: Math.random() * 3 + 1,
+                    alpha: Math.random() * 0.4 + 0.1
+                });
+            }
+            
+            // Matrix characters
+            bgMatrix = [];
+            const cols = Math.floor(canvas.width / 15);
+            for (let i = 0; i < cols; i++) {
+                bgMatrix.push({ y: Math.random() * canvas.height, speed: Math.random() * 3 + 2, chars: [] });
+                for (let j = 0; j < 20; j++) {
+                    bgMatrix[i].chars.push(String.fromCharCode(0x30A0 + Math.random() * 96));
+                }
+            }
+            
+            // Bubbles
+            bgBubbles = [];
+            for (let i = 0; i < 40; i++) {
+                bgBubbles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 30 + 10,
+                    speed: Math.random() * 0.5 + 0.2,
+                    wobble: Math.random() * Math.PI * 2
+                });
+            }
+            
+            // Fireflies
+            bgFireflies = [];
+            for (let i = 0; i < 50; i++) {
+                bgFireflies.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    glow: Math.random(),
+                    glowSpeed: Math.random() * 0.05 + 0.02
+                });
+            }
         }
         
+        // === AUDIO ===
         async function handleMicClick() {
             const btn = document.getElementById('startBtn');
-            btn.textContent = 'Requesting...'; btn.disabled = true;
+            btn.textContent = 'Requesting...';
+            btn.disabled = true;
+            
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
                 btn.textContent = 'Setting up...';
+                
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 analyser = audioCtx.createAnalyser();
                 analyser.fftSize = 1024;
                 analyser.smoothingTimeConstant = smoothing;
+                
                 const source = audioCtx.createMediaStreamSource(stream);
                 source.connect(analyser);
+                
                 dataArray = new Uint8Array(analyser.frequencyBinCount);
+                
                 document.getElementById('startScreen').classList.add('hidden');
-                document.getElementById('infoBar').classList.add('visible');
-                document.getElementById('fullscreenBtn').classList.add('visible');
-                document.getElementById('settingsBtn').classList.add('visible');
-                document.getElementById('selectorsContainer').classList.add('visible');
+                document.querySelectorAll('.ui-element').forEach(el => el.classList.add('visible'));
+                
                 isStarted = true;
                 requestAnimationFrame(animate);
+                
             } catch (err) {
-                btn.disabled = false; btn.textContent = 'Retry Connection'; btn.classList.add('error');
-                document.getElementById('startNote').textContent = err.message === 'Permission denied' ? 'Please allow microphone access in browser settings' : 'Error: ' + err.message;
+                btn.disabled = false;
+                btn.textContent = 'Retry Connection';
+                btn.classList.add('error');
+                document.getElementById('startNote').textContent = err.message === 'Permission denied' 
+                    ? 'Please allow microphone access in browser settings' 
+                    : 'Error: ' + err.message;
             }
         }
         
         function getBands() {
             if (!analyser) return { bass: 0, mid: 0, treble: 0 };
+            
             analyser.getByteFrequencyData(dataArray);
-            const len = dataArray.length, bassEnd = Math.floor(len * 0.1), midEnd = Math.floor(len * 0.5);
+            const len = dataArray.length;
+            
+            const bassEnd = Math.floor(len * 0.1);
+            const midEnd = Math.floor(len * 0.5);
+            
             let bassSum = 0, midSum = 0, trebleSum = 0;
             for (let i = 0; i < bassEnd; i++) bassSum += dataArray[i];
             for (let i = bassEnd; i < midEnd; i++) midSum += dataArray[i];
             for (let i = midEnd; i < len; i++) trebleSum += dataArray[i];
+            
             let bass = (bassSum / bassEnd / 255) * (sensitivity / 100);
             let mid = (midSum / (midEnd - bassEnd) / 255) * (sensitivity / 100);
             let treble = (trebleSum / (len - midEnd) / 255) * (sensitivity / 100) * (trebleBoost / 100);
+            
             bass = bass * (1 - smoothing) + (window._lastBass || bass) * smoothing;
             mid = mid * (1 - smoothing) + (window._lastMid || mid) * smoothing;
             treble = treble * (1 - smoothing) + (window._lastTreble || treble) * smoothing;
-            window._lastBass = bass; window._lastMid = mid; window._lastTreble = treble;
+            
+            window._lastBass = bass;
+            window._lastMid = mid;
+            window._lastTreble = treble;
+            
             return { bass, mid, treble };
         }
         
+        // === THEMES ===
         Object.entries(themes).forEach(([key, theme]) => {
             const div = document.createElement('div');
             div.className = 'theme-option' + (key === currentTheme ? ' active' : '');
@@ -273,119 +661,977 @@
             document.documentElement.style.setProperty('--bass', t.bass);
             document.documentElement.style.setProperty('--mid', t.mid);
             document.documentElement.style.setProperty('--treble', t.treble);
-            document.querySelectorAll('.theme-option').forEach((el, i) => el.classList.toggle('active', Object.keys(themes)[i] === theme));
+            document.querySelectorAll('.theme-option').forEach((el, i) => {
+                el.classList.toggle('active', Object.keys(themes)[i] === theme);
+            });
         }
         
+        // === SETTINGS ===
         function updateSetting(name, value) {
-            document.getElementById(name + 'Val').textContent = value + '%';
-            switch(name) { case 'sensitivity': sensitivity = parseInt(value); break; case 'smoothing': smoothing = parseInt(value) / 100; if (analyser) analyser.smoothingTimeConstant = smoothing; break; case 'trebleBoost': trebleBoost = parseInt(value); break; case 'speed': speed = parseInt(value) / 100; break; case 'intensity': intensity = parseInt(value) / 100; break; case 'trail': trailAmount = 1 - (parseInt(value) / 100); break; }
+            const display = document.getElementById(name + 'Val');
+            display.textContent = value + '%';
+            
+            switch(name) {
+                case 'sensitivity': sensitivity = parseInt(value); break;
+                case 'smoothing': 
+                    smoothing = parseInt(value) / 100;
+                    if (analyser) analyser.smoothingTimeConstant = smoothing;
+                    break;
+                case 'trebleBoost': trebleBoost = parseInt(value); break;
+                case 'speed': speed = parseInt(value) / 100; break;
+                case 'intensity': intensity = parseInt(value) / 100; break;
+                case 'trail': trailAmount = 1 - (parseInt(value) / 100); break;
+            }
         }
         
-        function setBackground(bg) { currentBg = bg; document.querySelectorAll('#bgSelector .selector-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase() === bg)); }
-        function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('open'); document.getElementById('overlayBackdrop').classList.toggle('visible'); }
-        function setViz(viz) { currentViz = viz; document.querySelectorAll('#vizSelector .selector-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase() === viz)); }
-        function toggleFullscreen() { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen(); }
-        function hideSelectors() { selectorsVisible = false; document.getElementById('selectorsContainer').classList.add('hidden'); document.getElementById('toggleIndicator').classList.add('visible'); }
-        function showSelectors() { selectorsVisible = true; document.getElementById('selectorsContainer').classList.remove('hidden'); document.getElementById('selectorsContainer').classList.add('visible'); document.getElementById('toggleIndicator').classList.remove('visible'); }
-        function toggleEffect(name) { effects[name] = !effects[name]; document.getElementById(name + 'Btn').classList.toggle('active', effects[name]); }
-        
-        function getCycledColors() {
-            const t = themes[currentTheme];
-            if (!effects.cycle) return t;
-            colorCycleOffset += 0.001 * speed;
-            const hexToRgb = hex => { const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16); return { r, g, b }; };
-            const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => Math.min(255, Math.max(0, Math.round(x))).toString(16).padStart(2, '0').join('');
-            const shift = (hex, offset) => { const rgb = hexToRgb(hex); const hsv = rgbToHsv(rgb.r, rgb.g, rgb.b); hsv.h = (hsv.h + offset) % 1; const rgb2 = hsvToRgb(hsv.h, hsv.s, hsv.v); return rgbToHex(rgb2.r, rgb2.g, rgb2.b); };
-            return { bass: shift(t.bass, colorCycleOffset), mid: shift(t.mid, colorCycleOffset + 0.33), treble: shift(t.treble, colorCycleOffset + 0.66), bg: t.bg };
+        function setBackground(bg) {
+            currentBg = bg;
+            document.querySelectorAll('#bgSelector .selector-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase() === bg);
+            });
         }
-        function rgbToHsv(r, g, b) { r /= 255; g /= 255; b /= 255; const max = Math.max(r, g, b), min = Math.min(r, g, b); let h, s, v = max; const d = max - min; s = max === 0 ? 0 : d / max; if (max === min) h = 0; else { switch(max) { case r: h = (g - b) / d + (g < b ? 6 : 0); break; case g: h = (b - r) / d + 2; break; case b: h = (r - g) / d + 4; break; } h /= 6; } return { h, s, v }; }
-        function hsvToRgb(h, s, v) { let r, g, b; const i = Math.floor(h * 6), f = h * 6 - i, p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s); switch(i % 6) { case 0: r = v; g = t; b = p; break; case 1: r = q; g = v; b = p; break; case 2: r = p; g = v; b = t; break; case 3: r = p; g = q; b = v; break; case 4: r = t; g = p; b = v; break; case 5: r = v; g = p; b = q; break; } return { r: r * 255, g: g * 255, b: b * 255 }; }
+        
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('open');
+            document.getElementById('overlayBackdrop').classList.toggle('visible');
+        }
+        
+        function setViz(viz) {
+            currentViz = viz;
+            document.querySelectorAll('#vizSelector .selector-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase() === viz);
+            });
+        }
         
         // === BACKGROUND EFFECTS (15) ===
+        
         function drawBackground(bands) {
-            const t = getCycledColors();
-            ctx.save();
             switch(currentBg) {
-                case 'particles': drawParticlesBg(bands, t); break; case 'stars': drawStarsBg(bands, t); break;
-                case 'nebula': drawNebulaBg(bands, t); break; case 'grid': drawGridBg(bands, t); break;
-                case 'constellation': drawConstellationBg(bands, t); break; case 'aurora': drawAuroraBg(bands, t); break;
-                case 'plasma': drawPlasmaBg(bands, t); break; case 'matrix': drawMatrixBg(bands, t); break;
-                case 'bubbles': drawBubblesBg(bands, t); break; case 'fireflies': drawFirefliesBg(bands, t); break;
-                case 'waves': drawBgWaves(bands, t); break; case 'noise': drawNoiseBg(bands, t); break;
-                case 'kaleido': drawKaleidoBg(bands, t); break; case 'inverted': drawInvertedBg(bands, t); break;
+                case 'particles': drawParticlesBg(bands); break;
+                case 'stars': drawStarsBg(bands); break;
+                case 'nebula': drawNebulaBg(bands); break;
+                case 'grid': drawGridBg(bands); break;
+                case 'constellation': drawConstellationBg(bands); break;
+                case 'aurora': drawAuroraBg(bands); break;
+                case 'plasma': drawPlasmaBg(bands); break;
+                case 'matrix': drawMatrixBg(bands); break;
+                case 'bubbles': drawBubblesBg(bands); break;
+                case 'fireflies': drawFirefliesBg(bands); break;
+                case 'waves': drawBgWaves(bands); break;
+                case 'noise': drawNoiseBg(bands); break;
+                case 'kaleido': drawKaleidoBg(bands); break;
+                case 'inverted': drawInvertedBg(bands); break;
                 case 'solid': drawSolidBg(); break;
             }
-            ctx.restore();
         }
         
-        function drawSolidBg() { ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-        function drawInvertedBg(bands, t) { const avg = (bands.bass + bands.mid + bands.treble) / 3, s = (1 - avg) * 0.15; const gradient = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 0, canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height) * 0.7); gradient.addColorStop(0, invertMuted(t.treble, s)); gradient.addColorStop(0.5, invertMuted(t.mid, s * 0.7)); gradient.addColorStop(1, invertMuted(t.bass, s * 0.5)); ctx.fillStyle = gradient; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-        function invertMuted(hex, s) { const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16); return `rgb(${Math.round(r + (255-r)*s)},${Math.round(g + (255-g)*s)},${Math.round(b + (255-b)*s)})`; }
-        function drawStarsBg(bands, t) { ctx.fillStyle = 'rgba(5, 5, 8, 0.97)'; ctx.fillRect(0, 0, canvas.width, canvas.height); bgStars.forEach(star => { const twinkle = Math.sin(time * star.twinkleSpeed * speed) * 0.3 + 0.7, size = star.size * (1 + bands.bass * 0.5); ctx.fillStyle = `rgba(255,255,255,${star.alpha * twinkle * (1 + bands.treble * 2) * intensity})`; ctx.beginPath(); ctx.arc(star.x, star.y, size, 0, Math.PI * 2); ctx.fill(); }); }
-        function drawParticlesBg(bands, t) { ctx.fillStyle = 'rgba(5, 5, 8, 0.92)'; ctx.fillRect(0, 0, canvas.width, canvas.height); const colors = [t.bass, t.mid, t.treble]; bgParticles.forEach((p, i) => { p.x += p.vx * (1 + bands.bass); p.y += p.vy * (1 + bands.mid); if (p.x < 0) p.x = canvas.width; if (p.x > canvas.width) p.x = 0; if (p.y < 0) p.y = canvas.height; if (p.y > canvas.height) p.y = 0; ctx.fillStyle = colors[i % 3]; ctx.globalAlpha = p.alpha * (0.5 + bands.mid * 0.5); ctx.shadowBlur = 10; ctx.shadowColor = colors[i % 3]; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 + bands.treble * 0.5), 0, Math.PI * 2); ctx.fill(); }); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
-        function drawNebulaBg(bands, t) { const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.005; ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, canvas.width, canvas.height); for (let layer = 0; layer < 3; layer++) { for (let y = 0; y < canvas.height; y += 12) { for (let x = 0; x < canvas.width; x += 12) { const nx = (x - cx) / canvas.width, ny = (y - cy) / canvas.height, dist = Math.sqrt(nx*nx + ny*ny); const noise = Math.sin(x * 0.005 + ts + layer * 0.5) * Math.cos(y * 0.005 + ts * 0.7 + layer * 0.5) * Math.sin(dist * 3 - ts * 1.5); if (noise > 0.15) { ctx.fillStyle = layer % 2 === 0 ? t.bass : t.mid; ctx.globalAlpha = (noise - 0.15) * (1 - dist * 0.5) * 0.12 * intensity; ctx.fillRect(x, y, 12, 12); } } } } const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 300 + bands.mid * 200); glow.addColorStop(0, t.mid + '22'); glow.addColorStop(0.5, t.treble + '11'); glow.addColorStop(1, 'transparent'); ctx.globalAlpha = 1; ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-        function drawGridBg(bands, t) { ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, canvas.width, canvas.height); const cx = canvas.width / 2, cy = canvas.height / 2; ctx.strokeStyle = t.mid; ctx.globalAlpha = 0.15 * intensity; ctx.lineWidth = 1; const horizon = cy * 0.4; for (let i = 0; i < 20; i++) { const y = horizon + (i / 20) * (canvas.height - horizon); ctx.globalAlpha = (i / 20) * 0.2 * intensity; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); } const vanishX = cx + Math.sin(time * speed * 0.01) * 100 * bands.treble; for (let i = -10; i <= 10; i++) { ctx.globalAlpha = 0.15 * intensity; ctx.beginPath(); ctx.moveTo(vanishX, horizon); ctx.lineTo(cx + i * 150, canvas.height); ctx.stroke(); } ctx.globalAlpha = 1; }
-        function drawConstellationBg(bands, t) { ctx.fillStyle = 'rgba(5, 5, 8, 0.95)'; ctx.fillRect(0, 0, canvas.width, canvas.height); const ts = time * speed * 0.008; const points = []; for (let i = 0; i < 30; i++) points.push({ x: Math.sin(ts + i * 0.5) * canvas.width * 0.3 + canvas.width/2, y: Math.cos(ts * 0.7 + i * 0.3) * canvas.height * 0.3 + canvas.height/2, size: 2 + Math.sin(ts + i) }); for (let i = 0; i < points.length; i++) { for (let j = i + 1; j < points.length; j++) { const dist = Math.hypot(points[i].x - points[j].x, points[i].y - points[j].y); if (dist < 200) { ctx.strokeStyle = t.mid; ctx.globalAlpha = (1 - dist/200) * 0.3 * intensity; ctx.beginPath(); ctx.moveTo(points[i].x, points[i].y); ctx.lineTo(points[j].x, points[j].y); ctx.stroke(); } } } points.forEach((p, i) => { ctx.fillStyle = i % 3 === 0 ? t.bass : (i % 3 === 1 ? t.mid : t.treble); ctx.globalAlpha = (0.5 + Math.sin(ts * 3 + i) * 0.3) * intensity; ctx.shadowBlur = 10; ctx.shadowColor = ctx.fillStyle; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill(); }); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
-        function drawAuroraBg(bands, t) { ctx.fillStyle = '#030408'; ctx.fillRect(0, 0, canvas.width, canvas.height); const ts = time * speed * 0.02; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(0, canvas.height * 0.5); for (let x = 0; x <= canvas.width; x += 10) { const y = canvas.height * 0.3 + Math.sin(x * 0.005 + ts + i) * 50 * bands.mid + Math.sin(x * 0.01 + ts * 1.5) * 30 + Math.sin(x * 0.002 + ts * 0.5) * 20 * bands.bass; ctx.lineTo(x, y + i * 30); } ctx.lineTo(canvas.width, canvas.height); ctx.lineTo(0, canvas.height); ctx.closePath(); ctx.fillStyle = i % 3 === 0 ? (t.aurora || t.mid) : (i % 3 === 1 ? t.bass : t.treble); ctx.globalAlpha = (0.15 - i * 0.02) * intensity; ctx.fill(); } ctx.globalAlpha = 1; }
-        function drawPlasmaBg(bands, t) { ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, canvas.width, canvas.height); const ts = time * speed * 0.015; const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height); const data = imgData.data; for (let y = 0; y < canvas.height; y += 8) { for (let x = 0; x < canvas.width; x += 8) { const v1 = Math.sin(x * 0.01 + ts), v2 = Math.sin((y * 0.01 + ts) * 0.5), v3 = Math.sin(Math.sqrt(Math.pow(x-canvas.width/2, 2) + Math.pow(y-canvas.height/2, 2)) * 0.02 - ts); const val = (v1 + v2 + v3 + 3) / 6; const idx = (y * canvas.width + x) * 4; data[idx] = parseInt(t.bass.slice(1,3), 16) * val * intensity; data[idx+1] = parseInt(t.mid.slice(1,3), 16) * val * intensity; data[idx+2] = parseInt(t.treble.slice(1,3), 16) * val * intensity; data[idx+3] = 255; } } ctx.putImageData(imgData, 0, 0); }
-        function drawMatrixBg(bands, t) { ctx.fillStyle = 'rgba(0, 10, 0, 0.9)'; ctx.fillRect(0, 0, canvas.width, canvas.height); const fontSize = 14; ctx.font = `${fontSize}px monospace`; bgMatrix.forEach((col, i) => { col.y += col.speed * (1 + bands.bass * 0.5); if (col.y > canvas.height + 200) { col.y = -50; col.speed = Math.random() * 3 + 2; } for (let j = 0; j < col.chars.length; j++) { const charY = col.y - j * fontSize; if (charY > 0 && charY < canvas.height) { const alpha = j === 0 ? 1 : Math.max(0, 1 - j / col.chars.length); ctx.fillStyle = j === 0 ? '#ffffff' : (j < 3 ? '#88ff88' : '#008800'); ctx.globalAlpha = alpha * 0.8 * intensity; ctx.fillText(col.chars[j], i * 15, charY); } } if (Math.random() < 0.02) col.chars[Math.floor(Math.random() * col.chars.length)] = String.fromCharCode(0x30A0 + Math.random() * 96); }); ctx.globalAlpha = 1; }
-        function drawBubblesBg(bands, t) { ctx.fillStyle = 'rgba(5, 5, 8, 0.9)'; ctx.fillRect(0, 0, canvas.width, canvas.height); bgBubbles.forEach(b => { b.y -= b.speed * (1 + bands.mid * 0.3); b.x += Math.sin(b.wobble + time * speed * 0.02) * 0.5; if (b.y < -b.size * 2) { b.y = canvas.height + b.size; b.x = Math.random() * canvas.width; } ctx.globalAlpha = 0.3 * intensity; ctx.strokeStyle = t.mid; ctx.lineWidth = 2; ctx.shadowBlur = 15; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2); ctx.stroke(); ctx.beginPath(); ctx.arc(b.x - b.size * 0.3, b.y - b.size * 0.3, b.size * 0.2, 0, Math.PI * 2); ctx.fillStyle = '#ffffff44'; ctx.fill(); }); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
-        function drawFirefliesBg(bands, t) { ctx.fillStyle = 'rgba(5, 5, 8, 0.92)'; ctx.fillRect(0, 0, canvas.width, canvas.height); bgFireflies.forEach(f => { f.x += f.vx * (1 + bands.bass * 0.5); f.y += f.vy * (1 + bands.bass * 0.5); f.glow += f.glowSpeed; if (f.x < 0) f.x = canvas.width; if (f.x > canvas.width) f.x = 0; if (f.y < 0) f.y = canvas.height; if (f.y > canvas.height) f.y = 0; const brightness = (Math.sin(f.glow) + 1) / 2; ctx.globalAlpha = brightness * intensity; ctx.fillStyle = brightness > 0.5 ? t.mid : t.bass; ctx.shadowBlur = 20; ctx.shadowColor = ctx.fillStyle; ctx.beginPath(); ctx.arc(f.x, f.y, 3 + brightness * 4, 0, Math.PI * 2); ctx.fill(); }); ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
-        function drawBgWaves(bands, t) { ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, canvas.width, canvas.height); const ts = time * speed * 0.02; for (let w = 0; w < 4; w++) { ctx.beginPath(); for (let x = 0; x <= canvas.width; x += 5) { const y = canvas.height * 0.5 + Math.sin(x * 0.008 + ts * (w + 1) * 0.5) * (50 + w * 30) * bands.mid + Math.sin(x * 0.015 + ts * (w + 1)) * 20; if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } const colors = [t.bass, t.mid, t.treble, t.bass]; ctx.strokeStyle = colors[w]; ctx.globalAlpha = (0.3 - w * 0.05) * intensity; ctx.lineWidth = 2; ctx.shadowBlur = 10; ctx.shadowColor = colors[w]; ctx.stroke(); } ctx.globalAlpha = 1; ctx.shadowBlur = 0; }
-        function drawNoiseBg(bands, t) { ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, canvas.width, canvas.height); const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height); const data = imgData.data; for (let i = 0; i < data.length; i += 16) { const noise = Math.random() * 50 * intensity; data[i] = parseInt(t.bass.slice(1,3), 16) * noise / 255; data[i+1] = parseInt(t.mid.slice(1,3), 16) * noise / 255; data[i+2] = parseInt(t.treble.slice(1,3), 16) * noise / 255; } ctx.putImageData(imgData, 0, 0); }
-        function drawKaleidoBg(bands, t) { const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.01; ctx.fillStyle = '#050508'; ctx.fillRect(0, 0, canvas.width, canvas.height); const segments = 12, maxR = Math.min(canvas.width, canvas.height) * 0.4; for (let layer = 0; layer < 3; layer++) { const rot = ts * (layer + 1) * 0.5, scale = 0.4 + layer * 0.25; for (let seg = 0; seg < segments; seg++) { const angle = (seg / segments) * Math.PI * 2 + rot; ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle); ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(maxR * scale, maxR * scale * 0.3); ctx.lineTo(maxR * scale, -maxR * scale * 0.3); ctx.closePath(); ctx.fillStyle = [t.bass, t.mid, t.treble][(seg + layer) % 3]; ctx.globalAlpha = (0.2 - layer * 0.05) * intensity; ctx.fill(); ctx.restore(); } } ctx.globalAlpha = 1; }
+        function drawSolidBg() {
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
         
-        // === VISUALIZERS (15 - FULL) ===
+        function drawInvertedBg(bands) {
+            const t = themes[currentTheme];
+            const avg = (bands.bass + bands.mid + bands.treble) / 3;
+            const invertStrength = (1 - avg) * 0.15;
+            
+            const gradient = ctx.createRadialGradient(
+                canvas.width/2, canvas.height/2, 0,
+                canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height) * 0.7
+            );
+            gradient.addColorStop(0, invertMuted(t.treble, invertStrength));
+            gradient.addColorStop(0.5, invertMuted(t.mid, invertStrength * 0.7));
+            gradient.addColorStop(1, invertMuted(t.bass, invertStrength * 0.5));
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        function invertMuted(hex, strength) {
+            const r = parseInt(hex.slice(1,3), 16);
+            const g = parseInt(hex.slice(3,5), 16);
+            const b = parseInt(hex.slice(5,7), 16);
+            return `rgb(${Math.round(r + (255-r)*strength)},${Math.round(g + (255-g)*strength)},${Math.round(b + (255-b)*strength)})`;
+        }
+        
+        function drawStarsBg(bands) {
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.97)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const twinkleMult = 1 + bands.treble * 2;
+            bgStars.forEach(star => {
+                const twinkle = Math.sin(time * star.twinkleSpeed * speed) * 0.3 + 0.7;
+                const size = star.size * (1 + bands.bass * 0.5);
+                ctx.fillStyle = `rgba(255,255,255,${star.alpha * twinkle * twinkleMult * intensity})`;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+        
+        function drawParticlesBg(bands) {
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.92)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const t = themes[currentTheme];
+            const colors = [t.bass, t.mid, t.treble];
+            
+            bgParticles.forEach((p, i) => {
+                p.x += p.vx * (1 + bands.bass);
+                p.y += p.vy * (1 + bands.mid);
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                
+                const color = colors[i % 3];
+                const size = p.size * (1 + bands.treble * 0.5);
+                ctx.fillStyle = color;
+                ctx.globalAlpha = p.alpha * (0.5 + bands.mid * 0.5);
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawNebulaBg(bands) {
+            const t = themes[currentTheme];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const timeSpeed = time * speed * 0.005;
+            
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let layer = 0; layer < 3; layer++) {
+                const offset = layer * 0.5;
+                
+                for (let y = 0; y < canvas.height; y += 12) {
+                    for (let x = 0; x < canvas.width; x += 12) {
+                        const nx = (x - cx) / canvas.width;
+                        const ny = (y - cy) / canvas.height;
+                        const dist = Math.sqrt(nx*nx + ny*ny);
+                        
+                        const noise = Math.sin(x * 0.005 + timeSpeed + offset) * 
+                                     Math.cos(y * 0.005 + timeSpeed * 0.7 + offset) *
+                                     Math.sin(dist * 3 - timeSpeed * 1.5);
+                        
+                        if (noise > 0.15) {
+                            const alpha = (noise - 0.15) * (1 - dist * 0.5) * 0.12 * intensity;
+                            ctx.fillStyle = layer % 2 === 0 ? t.bass : t.mid;
+                            ctx.globalAlpha = alpha;
+                            ctx.fillRect(x, y, 12, 12);
+                        }
+                    }
+                }
+            }
+            
+            const glowSize = 300 + bands.mid * 200;
+            const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
+            glow.addColorStop(0, t.mid + '22');
+            glow.addColorStop(0.5, t.treble + '11');
+            glow.addColorStop(1, 'transparent');
+            
+            ctx.globalAlpha = 1;
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        
+        function drawGridBg(bands) {
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const t = themes[currentTheme];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const perspective = 800 + bands.bass * 400;
+            
+            // Perspective grid
+            const gridSize = 50;
+            const horizon = cy * 0.4;
+            
+            ctx.strokeStyle = t.mid;
+            ctx.globalAlpha = 0.15 * intensity;
+            ctx.lineWidth = 1;
+            
+            // Horizontal lines (perspective)
+            for (let i = 0; i < 20; i++) {
+                const y = horizon + (i / 20) * (canvas.height - horizon);
+                const alpha = (i / 20) * 0.2;
+                ctx.globalAlpha = alpha * intensity;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Vertical lines (converging)
+            const vanishX = cx + Math.sin(time * speed * 0.01) * 100 * bands.treble;
+            for (let i = -10; i <= 10; i++) {
+                const bottomX = cx + i * gridSize * 3;
+                ctx.globalAlpha = 0.15 * intensity;
+                ctx.beginPath();
+                ctx.moveTo(vanishX, horizon);
+                ctx.lineTo(bottomX, canvas.height);
+                ctx.stroke();
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawConstellationBg(bands) {
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.95)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const t = themes[currentTheme];
+            const timeSpeed = time * speed * 0.008;
+            
+            // Generate constellation points
+            const points = [];
+            for (let i = 0; i < 30; i++) {
+                points.push({
+                    x: Math.sin(timeSpeed + i * 0.5) * canvas.width * 0.3 + canvas.width/2,
+                    y: Math.cos(timeSpeed * 0.7 + i * 0.3) * canvas.height * 0.3 + canvas.height/2,
+                    size: 2 + Math.sin(timeSpeed + i) * 1
+                });
+            }
+            
+            // Draw connections
+            ctx.strokeStyle = t.mid;
+            ctx.globalAlpha = 0.2 * intensity;
+            ctx.lineWidth = 1;
+            for (let i = 0; i < points.length; i++) {
+                for (let j = i + 1; j < points.length; j++) {
+                    const dist = Math.hypot(points[i].x - points[j].x, points[i].y - points[j].y);
+                    if (dist < 200) {
+                        ctx.globalAlpha = (1 - dist/200) * 0.3 * intensity;
+                        ctx.beginPath();
+                        ctx.moveTo(points[i].x, points[i].y);
+                        ctx.lineTo(points[j].x, points[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            // Draw stars
+            points.forEach((p, i) => {
+                ctx.fillStyle = i % 3 === 0 ? t.bass : (i % 3 === 1 ? t.mid : t.treble);
+                ctx.globalAlpha = (0.5 + Math.sin(timeSpeed * 3 + i) * 0.3) * intensity;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = ctx.fillStyle;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawAuroraBg(bands) {
+            const t = themes[currentTheme];
+            
+            // Dark base
+            ctx.fillStyle = '#030408';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const timeSpeed = time * speed * 0.02;
+            
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, canvas.height * 0.5);
+                
+                for (let x = 0; x <= canvas.width; x += 10) {
+                    const y = canvas.height * 0.3 + 
+                        Math.sin(x * 0.005 + timeSpeed + i) * 50 * bands.mid +
+                        Math.sin(x * 0.01 + timeSpeed * 1.5) * 30 +
+                        Math.sin(x * 0.002 + timeSpeed * 0.5) * 20 * bands.bass;
+                    ctx.lineTo(x, y + i * 30);
+                }
+                
+                ctx.lineTo(canvas.width, canvas.height);
+                ctx.lineTo(0, canvas.height);
+                ctx.closePath();
+                
+                const colors = [t.aurora || t.mid, t.bass, t.treble];
+                ctx.fillStyle = colors[i % 3];
+                ctx.globalAlpha = (0.15 - i * 0.02) * intensity;
+                ctx.fill();
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawPlasmaBg(bands) {
+            const t = themes[currentTheme];
+            const timeSpeed = time * speed * 0.015;
+            
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            
+            const step = 8;
+            for (let y = 0; y < canvas.height; y += step) {
+                for (let x = 0; x < canvas.width; x += step) {
+                    const v1 = Math.sin(x * 0.01 + timeSpeed);
+                    const v2 = Math.sin((y * 0.01 + timeSpeed) * 0.5);
+                    const v3 = Math.sin(Math.sqrt(Math.pow(x-canvas.width/2, 2) + Math.pow(y-canvas.height/2, 2)) * 0.02 - timeSpeed);
+                    const val = (v1 + v2 + v3 + 3) / 6;
+                    
+                    const idx = (y * canvas.width + x) * 4;
+                    const r = parseInt(themes[currentTheme].bass.slice(1,3), 16);
+                    const g = parseInt(themes[currentTheme].mid.slice(1,3), 16);
+                    const b = parseInt(themes[currentTheme].treble.slice(1,3), 16);
+                    
+                    data[idx] = r * val * intensity;
+                    data[idx+1] = g * val * intensity;
+                    data[idx+2] = b * val * intensity;
+                    data[idx+3] = 255;
+                }
+            }
+            
+            ctx.putImageData(imgData, 0, 0);
+        }
+        
+        function drawMatrixBg(bands) {
+            ctx.fillStyle = 'rgba(0, 10, 0, 0.9)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const t = themes[currentTheme];
+            const fontSize = 14;
+            
+            ctx.font = `${fontSize}px monospace`;
+            
+            bgMatrix.forEach((col, i) => {
+                col.y += col.speed * (1 + bands.bass * 0.5);
+                if (col.y > canvas.height + 200) {
+                    col.y = -50;
+                    col.speed = Math.random() * 3 + 2;
+                }
+                
+                for (let j = 0; j < col.chars.length; j++) {
+                    const charY = col.y - j * fontSize;
+                    if (charY > 0 && charY < canvas.height) {
+                        const alpha = j === 0 ? 1 : Math.max(0, 1 - j / col.chars.length);
+                        ctx.fillStyle = j === 0 ? '#ffffff' : (j < 3 ? '#88ff88' : '#008800');
+                        ctx.globalAlpha = alpha * 0.8 * intensity;
+                        ctx.fillText(col.chars[j], i * 15, charY);
+                    }
+                }
+                
+                if (Math.random() < 0.02) {
+                    col.chars[Math.floor(Math.random() * col.chars.length)] = String.fromCharCode(0x30A0 + Math.random() * 96);
+                }
+            });
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        function drawBubblesBg(bands) {
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.9)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const t = themes[currentTheme];
+            
+            bgBubbles.forEach(b => {
+                b.y -= b.speed * (1 + bands.mid * 0.3);
+                b.x += Math.sin(b.wobble + time * speed * 0.02) * 0.5;
+                
+                if (b.y < -b.size * 2) {
+                    b.y = canvas.height + b.size;
+                    b.x = Math.random() * canvas.width;
+                }
+                
+                ctx.globalAlpha = 0.3 * intensity;
+                ctx.strokeStyle = t.mid;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = t.mid;
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Highlight
+                ctx.beginPath();
+                ctx.arc(b.x - b.size * 0.3, b.y - b.size * 0.3, b.size * 0.2, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff44';
+                ctx.fill();
+            });
+            
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawFirefliesBg(bands) {
+            ctx.fillStyle = 'rgba(5, 5, 8, 0.92)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const t = themes[currentTheme];
+            
+            bgFireflies.forEach(f => {
+                f.x += f.vx * (1 + bands.bass * 0.5);
+                f.y += f.vy * (1 + bands.bass * 0.5);
+                f.glow += f.glowSpeed;
+                
+                if (f.x < 0) f.x = canvas.width;
+                if (f.x > canvas.width) f.x = 0;
+                if (f.y < 0) f.y = canvas.height;
+                if (f.y > canvas.height) f.y = 0;
+                
+                const brightness = (Math.sin(f.glow) + 1) / 2;
+                const size = 3 + brightness * 4;
+                
+                ctx.globalAlpha = brightness * intensity;
+                ctx.fillStyle = brightness > 0.5 ? t.mid : t.bass;
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = ctx.fillStyle;
+                ctx.beginPath();
+                ctx.arc(f.x, f.y, size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawBgWaves(bands) {
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const t = themes[currentTheme];
+            const timeSpeed = time * speed * 0.02;
+            
+            for (let w = 0; w < 4; w++) {
+                ctx.beginPath();
+                for (let x = 0; x <= canvas.width; x += 5) {
+                    const y = canvas.height * 0.5 + 
+                        Math.sin(x * 0.008 + timeSpeed * (w + 1) * 0.5) * (50 + w * 30) * bands.mid +
+                        Math.sin(x * 0.015 + timeSpeed * (w + 1)) * 20;
+                    
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                
+                const colors = [t.bass, t.mid, t.treble, t.bass];
+                ctx.strokeStyle = colors[w];
+                ctx.globalAlpha = (0.3 - w * 0.05) * intensity;
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = colors[w];
+                ctx.stroke();
+            }
+            
+            ctx.globalAlpha = 1;
+            ctx.shadowBlur = 0;
+        }
+        
+        function drawNoiseBg(bands) {
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const t = themes[currentTheme];
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            
+            for (let i = 0; i < data.length; i += 16) { // Skip pixels for performance
+                const noise = Math.random() * 50 * intensity;
+                data[i] = parseInt(t.bass.slice(1,3), 16) * noise / 255;
+                data[i+1] = parseInt(t.mid.slice(1,3), 16) * noise / 255;
+                data[i+2] = parseInt(t.treble.slice(1,3), 16) * noise / 255;
+                data[i+3] = 255;
+            }
+            
+            ctx.putImageData(imgData, 0, 0);
+        }
+        
+        function drawKaleidoBg(bands) {
+            const t = themes[currentTheme];
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const timeSpeed = time * speed * 0.01;
+            
+            ctx.fillStyle = '#050508';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const segments = 12;
+            const maxR = Math.min(canvas.width, canvas.height) * 0.4;
+            
+            for (let layer = 0; layer < 3; layer++) {
+                const rot = timeSpeed * (layer + 1) * 0.5;
+                const scale = 0.4 + layer * 0.25;
+                
+                for (let seg = 0; seg < segments; seg++) {
+                    const angle = (seg / segments) * Math.PI * 2 + rot;
+                    
+                    ctx.save();
+                    ctx.translate(cx, cy);
+                    ctx.rotate(angle);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(30, 0);
+                    ctx.lineTo(maxR * scale, maxR * scale * 0.3);
+                    ctx.lineTo(maxR * scale, -maxR * scale * 0.3);
+                    ctx.closePath();
+                    
+                    const colors = [t.bass, t.mid, t.treble];
+                    ctx.fillStyle = colors[(seg + layer) % 3];
+                    ctx.globalAlpha = (0.2 - layer * 0.05) * intensity;
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        // === VISUALIZERS (15 - same as before, abbreviated for space) ===
+        
         function drawPortal(bands) {
-            const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, maxR = Math.min(canvas.width, canvas.height) * 0.45, ts = time * speed * 0.015;
-            const direction = bands.bass > 0.5 ? -1 : 1, twistAmount = bands.mid * 2;
-            for (let i = 0; i < 5; i++) { const haloR = maxR * (0.8 + i * 0.1) + Math.sin(ts * 3 * direction + i * 0.5) * bands.bass * 30; ctx.beginPath(); ctx.arc(cx, cy, haloR, 0, Math.PI * 2); ctx.strokeStyle = t.bass; ctx.globalAlpha = (0.5 - i * 0.07) * intensity; ctx.lineWidth = 8 - i * 0.8; ctx.shadowBlur = 40; ctx.shadowColor = t.bass; ctx.stroke(); }
-            for (let arm = 0; arm < 5; arm++) { const armOffset = (arm / 5) * Math.PI * 2; ctx.beginPath(); for (let a = 0; a < Math.PI * 2; a += 0.03) { const spiral = a * (2.5 + twistAmount) + ts * direction, r = (a / (Math.PI * 2)) * maxR * (0.2 + bands.mid * 0.8), wobble = Math.sin(a * 6 + ts * 4) * 10 * bands.treble, x = cx + Math.cos(spiral + armOffset) * (r + wobble), y = cy + Math.sin(spiral + armOffset) * (r + wobble); if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } const gradient = ctx.createLinearGradient(cx - maxR, cy - maxR, cx + maxR, cy + maxR); gradient.addColorStop(0, t.bass); gradient.addColorStop(0.5, t.mid); gradient.addColorStop(1, t.treble); ctx.strokeStyle = gradient; ctx.globalAlpha = 0.9 * intensity; ctx.lineWidth = 2 + bands.bass * 6; ctx.shadowBlur = 30; ctx.shadowColor = t.mid; ctx.stroke(); }
-            const coreSize = 30 + bands.treble * 120, coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreSize); coreGradient.addColorStop(0, '#ffffff'); coreGradient.addColorStop(0.2, t.mid); coreGradient.addColorStop(0.6, t.treble + 'cc'); coreGradient.addColorStop(1, t.treble + '00'); ctx.globalAlpha = 1; ctx.fillStyle = coreGradient; ctx.shadowBlur = 100; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(cx, cy, coreSize, 0, Math.PI * 2); ctx.fill();
-            if (bands.treble > 0.05) { for (let i = 0; i < Math.floor(bands.treble * 80); i++) { const angle = Math.random() * Math.PI * 2 + ts * direction * 0.5, dist = Math.random() * maxR * 0.9; ctx.fillStyle = t.treble; ctx.globalAlpha = Math.random() * 0.9; ctx.shadowBlur = 15; ctx.shadowColor = t.treble; ctx.beginPath(); ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, Math.random() * 5 + 1, 0, Math.PI * 2); ctx.fill(); } }
+            const t = themes[currentTheme];
+            const cx = canvas.width / 2, cy = canvas.height / 2;
+            const maxR = Math.min(canvas.width, canvas.height) * 0.45;
+            const timeSpeed = time * speed * 0.015;
+            const direction = bands.bass > 0.5 ? -1 : 1;
+            const twistAmount = bands.mid * 2;
+            
+            for (let i = 0; i < 5; i++) {
+                const haloR = maxR * (0.8 + i * 0.1) + Math.sin(timeSpeed * 3 * direction + i * 0.5) * bands.bass * 30;
+                ctx.beginPath();
+                ctx.arc(cx, cy, haloR, 0, Math.PI * 2);
+                ctx.strokeStyle = t.bass;
+                ctx.globalAlpha = (0.5 - i * 0.07) * intensity;
+                ctx.lineWidth = 8 - i * 0.8;
+                ctx.shadowBlur = 40;
+                ctx.shadowColor = t.bass;
+                ctx.stroke();
+            }
+            
+            for (let arm = 0; arm < 5; arm++) {
+                const armOffset = (arm / 5) * Math.PI * 2;
+                ctx.beginPath();
+                for (let a = 0; a < Math.PI * 2; a += 0.03) {
+                    const spiral = a * (2.5 + twistAmount) + timeSpeed * direction;
+                    const r = (a / (Math.PI * 2)) * maxR * (0.2 + bands.mid * 0.8);
+                    const wobble = Math.sin(a * 6 + timeSpeed * 4) * 10 * bands.treble;
+                    const x = cx + Math.cos(spiral + armOffset) * (r + wobble);
+                    const y = cy + Math.sin(spiral + armOffset) * (r + wobble);
+                    if (a === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                const gradient = ctx.createLinearGradient(cx - maxR, cy - maxR, cx + maxR, cy + maxR);
+                gradient.addColorStop(0, t.bass); gradient.addColorStop(0.5, t.mid); gradient.addColorStop(1, t.treble);
+                ctx.strokeStyle = gradient;
+                ctx.globalAlpha = 0.9 * intensity;
+                ctx.lineWidth = 2 + bands.bass * 6;
+                ctx.shadowBlur = 30;
+                ctx.shadowColor = t.mid;
+                ctx.stroke();
+            }
+            
+            const coreSize = 30 + bands.treble * 120;
+            const coreGradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreSize);
+            coreGradient.addColorStop(0, '#ffffff'); coreGradient.addColorStop(0.2, t.mid);
+            coreGradient.addColorStop(0.6, t.treble + 'cc'); coreGradient.addColorStop(1, t.treble + '00');
+            ctx.globalAlpha = 1; ctx.fillStyle = coreGradient;
+            ctx.shadowBlur = 100; ctx.shadowColor = t.mid;
+            ctx.beginPath(); ctx.arc(cx, cy, coreSize, 0, Math.PI * 2); ctx.fill();
+            
+            if (bands.treble > 0.05) {
+                for (let i = 0; i < Math.floor(bands.treble * 80); i++) {
+                    const angle = Math.random() * Math.PI * 2 + timeSpeed * direction * 0.5;
+                    const dist = Math.random() * maxR * 0.9;
+                    ctx.fillStyle = t.treble; ctx.globalAlpha = Math.random() * 0.9;
+                    ctx.shadowBlur = 15; ctx.shadowColor = t.treble;
+                    ctx.beginPath(); ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, Math.random() * 5 + 1, 0, Math.PI * 2); ctx.fill();
+                }
+            }
             ctx.shadowBlur = 0; ctx.globalAlpha = 1;
         }
         
-        function drawNebula(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.01; for (let layer = 0; layer < 4; layer++) { const offset = layer * 0.3; for (let y = 0; y < canvas.height; y += 8) { for (let x = 0; x < canvas.width; x += 8) { const nx = (x - cx) / canvas.width, ny = (y - cy) / canvas.height, dist = Math.sqrt(nx*nx + ny*ny); const noise = Math.sin(x * 0.008 + ts + offset) * Math.cos(y * 0.008 + ts * 0.7 + offset) * Math.sin(dist * 4 - ts * 2); if (noise > 0.2) { ctx.fillStyle = layer % 2 === 0 ? t.bass : t.mid; ctx.globalAlpha = (noise - 0.2) * (1 - dist) * 0.25 * intensity; ctx.fillRect(x, y, 8, 8); } } } } const glowSize = 200 + bands.mid * 300, glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize); glow.addColorStop(0, t.mid + '44'); glow.addColorStop(0.5, t.treble + '22'); glow.addColorStop(1, t.bass + '00'); ctx.globalAlpha = 1; ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height); for (let i = 0; i < Math.floor(bands.bass * 30); i++) { const angle = Math.random() * Math.PI * 2, dist = Math.random() * Math.min(canvas.width, canvas.height) * 0.4; ctx.fillStyle = Math.random() > 0.5 ? t.bass : t.treble; ctx.globalAlpha = 0.7; ctx.shadowBlur = 15; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(cx + Math.cos(angle + ts) * dist, cy + Math.sin(angle + ts) * dist, Math.random() * 4 + 2, 0, Math.PI * 2); ctx.fill(); } ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawNebula(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.01;
+            for (let layer = 0; layer < 4; layer++) {
+                const offset = layer * 0.3;
+                for (let y = 0; y < canvas.height; y += 8) {
+                    for (let x = 0; x < canvas.width; x += 8) {
+                        const nx = (x - cx) / canvas.width, ny = (y - cy) / canvas.height;
+                        const dist = Math.sqrt(nx*nx + ny*ny);
+                        const noise = Math.sin(x * 0.008 + timeSpeed + offset) * Math.cos(y * 0.008 + timeSpeed * 0.7 + offset) * Math.sin(dist * 4 - timeSpeed * 2);
+                        if (noise > 0.2) {
+                            ctx.fillStyle = layer % 2 === 0 ? t.bass : t.mid;
+                            ctx.globalAlpha = (noise - 0.2) * (1 - dist) * 0.25 * intensity;
+                            ctx.fillRect(x, y, 8, 8);
+                        }
+                    }
+                }
+            }
+            const glowSize = 200 + bands.mid * 300;
+            const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
+            glow.addColorStop(0, t.mid + '44'); glow.addColorStop(0.5, t.treble + '22'); glow.addColorStop(1, t.bass + '00');
+            ctx.globalAlpha = 1; ctx.fillStyle = glow; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < Math.floor(bands.bass * 30); i++) {
+                const angle = Math.random() * Math.PI * 2, dist = Math.random() * Math.min(canvas.width, canvas.height) * 0.4;
+                ctx.fillStyle = Math.random() > 0.5 ? t.bass : t.treble; ctx.globalAlpha = 0.7;
+                ctx.shadowBlur = 15; ctx.shadowColor = t.mid;
+                ctx.beginPath(); ctx.arc(cx + Math.cos(angle + timeSpeed) * dist, cy + Math.sin(angle + timeSpeed) * dist, Math.random() * 4 + 2, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawRings(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, maxR = Math.min(canvas.width, canvas.height) * 0.42, ts = time * speed * 0.02; for (let i = 0; i < 6; i++) { const phase = ((ts * 0.8 + i * 0.8) % 2.5) / 2.5, radius = phase * maxR, alpha = (1 - phase) * 0.7; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.strokeStyle = t.bass; ctx.globalAlpha = alpha * intensity; ctx.lineWidth = 2 + bands.bass * 6; ctx.shadowBlur = 25; ctx.shadowColor = t.bass; ctx.stroke(); const midR = radius * 0.75; if (midR > 10) { ctx.beginPath(); ctx.arc(cx, cy, midR, 0, Math.PI * 2); ctx.strokeStyle = t.mid; ctx.globalAlpha = alpha * 0.6 * intensity; ctx.lineWidth = 1.5 + bands.mid * 4; ctx.shadowColor = t.mid; ctx.stroke(); } } const orbSize = 15 + bands.treble * 60, orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbSize); orb.addColorStop(0, t.mid); orb.addColorStop(0.5, t.treble + '88'); orb.addColorStop(1, t.treble + '00'); ctx.globalAlpha = 1; ctx.fillStyle = orb; ctx.shadowBlur = 40; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(cx, cy, orbSize, 0, Math.PI * 2); ctx.fill(); for (let i = 0; i < Math.floor(bands.treble * 40); i++) { const angle = Math.random() * Math.PI * 2, dist = 30 + Math.random() * 80; ctx.fillStyle = t.treble; ctx.globalAlpha = 0.6 + Math.random() * 0.4; ctx.shadowBlur = 8; ctx.beginPath(); ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, 1 + Math.random() * 2, 0, Math.PI * 2); ctx.fill(); } ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawRings(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, maxR = Math.min(canvas.width, canvas.height) * 0.42, timeSpeed = time * speed * 0.02;
+            for (let i = 0; i < 6; i++) {
+                const phase = ((timeSpeed * 0.8 + i * 0.8) % 2.5) / 2.5, radius = phase * maxR, alpha = (1 - phase) * 0.7;
+                ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = t.bass; ctx.globalAlpha = alpha * intensity; ctx.lineWidth = 2 + bands.bass * 6;
+                ctx.shadowBlur = 25; ctx.shadowColor = t.bass; ctx.stroke();
+                const midR = radius * 0.75;
+                if (midR > 10) {
+                    ctx.beginPath(); ctx.arc(cx, cy, midR, 0, Math.PI * 2);
+                    ctx.strokeStyle = t.mid; ctx.globalAlpha = alpha * 0.6 * intensity; ctx.lineWidth = 1.5 + bands.mid * 4;
+                    ctx.shadowColor = t.mid; ctx.stroke();
+                }
+            }
+            const orbSize = 15 + bands.treble * 60, orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbSize);
+            orb.addColorStop(0, t.mid); orb.addColorStop(0.5, t.treble + '88'); orb.addColorStop(1, t.treble + '00');
+            ctx.globalAlpha = 1; ctx.fillStyle = orb; ctx.shadowBlur = 40; ctx.shadowColor = t.mid;
+            ctx.beginPath(); ctx.arc(cx, cy, orbSize, 0, Math.PI * 2); ctx.fill();
+            for (let i = 0; i < Math.floor(bands.treble * 40); i++) {
+                const angle = Math.random() * Math.PI * 2, dist = 30 + Math.random() * 80;
+                ctx.fillStyle = t.treble; ctx.globalAlpha = 0.6 + Math.random() * 0.4; ctx.shadowBlur = 8;
+                ctx.beginPath(); ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist, 1 + Math.random() * 2, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawPulses(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, maxR = Math.min(canvas.width, canvas.height) * 0.45, ts = time * speed * 0.03; for (let i = 0; i < 8; i++) { const phase = ((ts + i * 0.5) % 3) / 3, radius = phase * maxR, alpha = (1 - phase) * 0.6; ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.strokeStyle = i % 2 === 0 ? t.bass : t.mid; ctx.globalAlpha = alpha * intensity; ctx.lineWidth = 2 + bands.bass * 8 + bands.mid * 4; ctx.shadowBlur = 25; ctx.shadowColor = i % 2 === 0 ? t.bass : t.mid; ctx.stroke(); if (phase < 0.6) { ctx.beginPath(); ctx.arc(cx, cy, radius * 0.6, 0, Math.PI * 2); ctx.strokeStyle = t.treble; ctx.globalAlpha = alpha * 0.4 * intensity; ctx.lineWidth = (2 + bands.bass * 8 + bands.mid * 4) * 0.4; ctx.stroke(); } } if (bands.bass > 0.4) { const burstSize = 40 + bands.bass * 120, burst = ctx.createRadialGradient(cx, cy, 0, cx, cy, burstSize); burst.addColorStop(0, t.mid + 'cc'); burst.addColorStop(0.5, t.treble + '44'); burst.addColorStop(1, t.bass + '00'); ctx.globalAlpha = 1; ctx.fillStyle = burst; ctx.shadowBlur = 50; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(cx, cy, burstSize, 0, Math.PI * 2); ctx.fill(); } ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawPulses(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, maxR = Math.min(canvas.width, canvas.height) * 0.45, timeSpeed = time * speed * 0.03;
+            for (let i = 0; i < 8; i++) {
+                const phase = ((timeSpeed + i * 0.5) % 3) / 3, radius = phase * maxR, alpha = (1 - phase) * 0.6;
+                ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = i % 2 === 0 ? t.bass : t.mid; ctx.globalAlpha = alpha * intensity;
+                ctx.lineWidth = 2 + bands.bass * 8 + bands.mid * 4; ctx.shadowBlur = 25;
+                ctx.shadowColor = i % 2 === 0 ? t.bass : t.mid; ctx.stroke();
+                if (phase < 0.6) {
+                    ctx.beginPath(); ctx.arc(cx, cy, radius * 0.6, 0, Math.PI * 2);
+                    ctx.strokeStyle = t.treble; ctx.globalAlpha = alpha * 0.4 * intensity;
+                    ctx.lineWidth = (2 + bands.bass * 8 + bands.mid * 4) * 0.4; ctx.stroke();
+                }
+            }
+            if (bands.bass > 0.4) {
+                const burstSize = 40 + bands.bass * 120, burst = ctx.createRadialGradient(cx, cy, 0, cx, cy, burstSize);
+                burst.addColorStop(0, t.mid + 'cc'); burst.addColorStop(0.5, t.treble + '44'); burst.addColorStop(1, t.bass + '00');
+                ctx.globalAlpha = 1; ctx.fillStyle = burst; ctx.shadowBlur = 50; ctx.shadowColor = t.mid;
+                ctx.beginPath(); ctx.arc(cx, cy, burstSize, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawWaves(bands) { const t = getCycledColors(); const ts = time * speed * 0.025; const layers = [{ freq: bands.bass, color: t.bass, y: 0.35, amp: 60, speed: 1.5, lw: 2 }, { freq: bands.mid, color: t.mid, y: 0.5, amp: 50, speed: 2.2, lw: 2 }, { freq: bands.treble, color: t.treble, y: 0.65, amp: 35, speed: 3.5, lw: 1.5 }]; layers.forEach(layer => { ctx.beginPath(); for (let x = 0; x <= canvas.width; x += 4) { const y = canvas.height * layer.y + Math.sin(x * 0.01 + ts * layer.speed) * layer.amp * (0.3 + layer.freq * 0.7) + Math.sin(x * 0.018 + ts * layer.speed * 1.3) * layer.amp * 0.4 * bands.mid; if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.strokeStyle = layer.color; ctx.lineWidth = layer.lw + layer.freq * 5; ctx.globalAlpha = 0.8 * intensity; ctx.shadowBlur = 15; ctx.shadowColor = layer.color; ctx.stroke(); }); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawWaves(bands) {
+            const t = themes[currentTheme], timeSpeed = time * speed * 0.025;
+            const layers = [
+                { freq: bands.bass, color: t.bass, y: 0.35, amp: 60, speed: 1.5, lw: 2 },
+                { freq: bands.mid, color: t.mid, y: 0.5, amp: 50, speed: 2.2, lw: 2 },
+                { freq: bands.treble, color: t.treble, y: 0.65, amp: 35, speed: 3.5, lw: 1.5 }
+            ];
+            layers.forEach(layer => {
+                ctx.beginPath();
+                for (let x = 0; x <= canvas.width; x += 4) {
+                    const y = canvas.height * layer.y + Math.sin(x * 0.01 + timeSpeed * layer.speed) * layer.amp * (0.3 + layer.freq * 0.7) + Math.sin(x * 0.018 + timeSpeed * layer.speed * 1.3) * layer.amp * 0.4 * bands.mid;
+                    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.strokeStyle = layer.color; ctx.lineWidth = layer.lw + layer.freq * 5;
+                ctx.globalAlpha = 0.8 * intensity; ctx.shadowBlur = 15; ctx.shadowColor = layer.color; ctx.stroke();
+            });
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawShards(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.012; for (let i = 0; i < 16; i++) { const angle = (i / 16) * Math.PI * 2 + ts, bx = cx + Math.cos(angle) * 30, by = cy + Math.sin(angle) * 30, tx = cx + Math.cos(angle) * (30 + 120 + Math.sin(ts * 3 + i * 0.5) * 50 + bands.bass * 200), ty = cy + Math.sin(angle) * (30 + 120 + Math.sin(ts * 3 + i * 0.5) * 50 + bands.bass * 200), perpAngle = angle + Math.PI / 2, px1 = Math.cos(perpAngle) * (10 + bands.bass * 15), py1 = Math.sin(perpAngle) * (10 + bands.bass * 15), px2 = Math.cos(perpAngle) * (3 + bands.mid * 5), py2 = Math.sin(perpAngle) * (3 + bands.mid * 5); ctx.beginPath(); ctx.moveTo(bx + px1, by + py1); ctx.lineTo(tx + px2, ty + py2); ctx.lineTo(tx - px2, ty - py2); ctx.lineTo(bx - px1, by - py1); ctx.closePath(); const gradient = ctx.createLinearGradient(bx, by, tx, ty); gradient.addColorStop(0, t.bass); gradient.addColorStop(0.6, t.mid); gradient.addColorStop(1, t.treble); ctx.fillStyle = gradient; ctx.globalAlpha = 0.8 * intensity; ctx.shadowBlur = 20; ctx.shadowColor = t.mid; ctx.fill(); } const orbSize = 35 + bands.treble * 70, orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbSize); orb.addColorStop(0, '#ffffff'); orb.addColorStop(0.2, t.mid); orb.addColorStop(0.8, t.treble + 'aa'); orb.addColorStop(1, t.treble + '00'); ctx.globalAlpha = 1; ctx.fillStyle = orb; ctx.shadowBlur = 60; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(cx, cy, orbSize, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; }
+        function drawShards(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.012;
+            for (let i = 0; i < 16; i++) {
+                const angle = (i / 16) * Math.PI * 2 + timeSpeed;
+                const bx = cx + Math.cos(angle) * 30, by = cy + Math.sin(angle) * 30;
+                const tx = cx + Math.cos(angle) * (30 + 120 + Math.sin(timeSpeed * 3 + i * 0.5) * 50 + bands.bass * 200);
+                const ty = cy + Math.sin(angle) * (30 + 120 + Math.sin(timeSpeed * 3 + i * 0.5) * 50 + bands.bass * 200);
+                const perpAngle = angle + Math.PI / 2;
+                const px1 = Math.cos(perpAngle) * (10 + bands.bass * 15), py1 = Math.sin(perpAngle) * (10 + bands.bass * 15);
+                const px2 = Math.cos(perpAngle) * (3 + bands.mid * 5), py2 = Math.sin(perpAngle) * (3 + bands.mid * 5);
+                ctx.beginPath(); ctx.moveTo(bx + px1, by + py1); ctx.lineTo(tx + px2, ty + py2); ctx.lineTo(tx - px2, ty - py2); ctx.lineTo(bx - px1, by - py1); ctx.closePath();
+                const gradient = ctx.createLinearGradient(bx, by, tx, ty);
+                gradient.addColorStop(0, t.bass); gradient.addColorStop(0.6, t.mid); gradient.addColorStop(1, t.treble);
+                ctx.fillStyle = gradient; ctx.globalAlpha = 0.8 * intensity; ctx.shadowBlur = 20; ctx.shadowColor = t.mid; ctx.fill();
+            }
+            const orbSize = 35 + bands.treble * 70, orb = ctx.createRadialGradient(cx, cy, 0, cx, cy, orbSize);
+            orb.addColorStop(0, '#ffffff'); orb.addColorStop(0.2, t.mid); orb.addColorStop(0.8, t.treble + 'aa'); orb.addColorStop(1, t.treble + '00');
+            ctx.globalAlpha = 1; ctx.fillStyle = orb; ctx.shadowBlur = 60; ctx.shadowColor = t.mid;
+            ctx.beginPath(); ctx.arc(cx, cy, orbSize, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        }
         
-        function drawKaleido(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.018; const layers = [{ segments: 6, scale: 1.8, rotOffset: 0, speedMult: 1 }, { segments: 8, scale: 1.4, rotOffset: Math.PI/8, speedMult: -0.7 }, { segments: 12, scale: 1.0, rotOffset: Math.PI/12, speedMult: 0.5 }, { segments: 16, scale: 0.7, rotOffset: 0, speedMult: -0.3 }]; layers.forEach((layer, layerIdx) => { const segments = layer.segments, maxR = Math.min(canvas.width, canvas.height) * 0.35 * layer.scale, rot = ts * layer.speedMult + layer.rotOffset; for (let seg = 0; seg < segments; seg++) { const angle = (seg / segments) * Math.PI * 2 + rot; ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle); ctx.beginPath(); ctx.moveTo(maxR * 0.3, 0); ctx.quadraticCurveTo(maxR * 0.6, -maxR * 0.15 * (1 + bands.bass), maxR, 0); ctx.quadraticCurveTo(maxR * 0.6, maxR * 0.15 * (1 + bands.mid), maxR * 0.3, 0); const colors = [t.bass, t.mid, t.treble]; ctx.fillStyle = colors[(seg + layerIdx) % 3]; ctx.globalAlpha = (0.5 - layerIdx * 0.08) * intensity; ctx.shadowBlur = 20; ctx.shadowColor = colors[(seg + layerIdx) % 3]; ctx.fill(); if (layerIdx === 2) { ctx.beginPath(); ctx.arc(maxR * 0.5, 0, maxR * 0.12 + bands.treble * 10, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.3 + bands.treble * 0.3; ctx.fill(); } ctx.restore(); } }); const eyeSize = 25 + bands.treble * 40; ctx.beginPath(); ctx.arc(cx, cy, eyeSize * 1.5, 0, Math.PI * 2); ctx.strokeStyle = t.bass; ctx.globalAlpha = 0.5 * intensity; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = t.bass; ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, eyeSize, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.9; ctx.shadowBlur = 30; ctx.shadowColor = t.mid; ctx.fill(); const pupilSize = eyeSize * (0.3 + bands.bass * 0.3), pupil = ctx.createRadialGradient(cx, cy, 0, cx, cy, pupilSize); pupil.addColorStop(0, '#000000'); pupil.addColorStop(0.7, t.treble); pupil.addColorStop(1, t.treble + '00'); ctx.fillStyle = pupil; ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(cx, cy, pupilSize, 0, Math.PI * 2); ctx.fill(); ctx.beginPath(); ctx.arc(cx - eyeSize * 0.25, cy - eyeSize * 0.25, eyeSize * 0.15, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.8; ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawKaleido(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.018;
+            const layers = [
+                { segments: 6, scale: 1.8, rotOffset: 0, speedMult: 1 },
+                { segments: 8, scale: 1.4, rotOffset: Math.PI/8, speedMult: -0.7 },
+                { segments: 12, scale: 1.0, rotOffset: Math.PI/12, speedMult: 0.5 },
+                { segments: 16, scale: 0.7, rotOffset: 0, speedMult: -0.3 }
+            ];
+            layers.forEach((layer, layerIdx) => {
+                const segments = layer.segments, maxR = Math.min(canvas.width, canvas.height) * 0.35 * layer.scale, rot = timeSpeed * layer.speedMult + layer.rotOffset;
+                for (let seg = 0; seg < segments; seg++) {
+                    const angle = (seg / segments) * Math.PI * 2 + rot;
+                    ctx.save(); ctx.translate(cx, cy); ctx.rotate(angle);
+                    ctx.beginPath(); ctx.moveTo(maxR * 0.3, 0); ctx.quadraticCurveTo(maxR * 0.6, -maxR * 0.15 * (1 + bands.bass), maxR, 0); ctx.quadraticCurveTo(maxR * 0.6, maxR * 0.15 * (1 + bands.mid), maxR * 0.3, 0);
+                    const colors = [t.bass, t.mid, t.treble];
+                    ctx.fillStyle = colors[(seg + layerIdx) % 3]; ctx.globalAlpha = (0.5 - layerIdx * 0.08) * intensity;
+                    ctx.shadowBlur = 20; ctx.shadowColor = colors[(seg + layerIdx) % 3]; ctx.fill();
+                    if (layerIdx === 2) {
+                        ctx.beginPath(); ctx.arc(maxR * 0.5, 0, maxR * 0.12 + bands.treble * 10, 0, Math.PI * 2);
+                        ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.3 + bands.treble * 0.3; ctx.fill();
+                    }
+                    ctx.restore();
+                }
+            });
+            const eyeSize = 25 + bands.treble * 40;
+            ctx.beginPath(); ctx.arc(cx, cy, eyeSize * 1.5, 0, Math.PI * 2); ctx.strokeStyle = t.bass; ctx.globalAlpha = 0.5 * intensity; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = t.bass; ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy, eyeSize, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.9; ctx.shadowBlur = 30; ctx.shadowColor = t.mid; ctx.fill();
+            const pupilSize = eyeSize * (0.3 + bands.bass * 0.3), pupil = ctx.createRadialGradient(cx, cy, 0, cx, cy, pupilSize);
+            pupil.addColorStop(0, '#000000'); pupil.addColorStop(0.7, t.treble); pupil.addColorStop(1, t.treble + '00');
+            ctx.fillStyle = pupil; ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(cx, cy, pupilSize, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx - eyeSize * 0.25, cy - eyeSize * 0.25, eyeSize * 0.15, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.8; ctx.fill();
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawTunnel(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.035; const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(canvas.width, canvas.height) * 0.5); bgGlow.addColorStop(0, t.mid + '22'); bgGlow.addColorStop(0.5, t.treble + '11'); bgGlow.addColorStop(1, t.bass + '00'); ctx.fillStyle = bgGlow; ctx.globalAlpha = 1; ctx.fillRect(0, 0, canvas.width, canvas.height); for (let i = 0; i < 30; i++) { const z = i / 30, depth = 1 - z, baseRadius = 30 + z * Math.min(canvas.width, canvas.height) * 0.5, radius = baseRadius * (1 + bands.bass * 0.4 * depth) * (1 + bands.mid * 0.2 * (1 - z * 0.5)), isHighlight = (i % 3 === 0 && bands.treble > 0.2), color = i % 2 === 0 ? t.bass : (isHighlight ? t.treble : t.mid); ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2); ctx.strokeStyle = color; ctx.globalAlpha = z * 0.8 * intensity; ctx.lineWidth = (1 + bands.bass * 5) * depth; ctx.shadowBlur = isHighlight ? 20 : 10; ctx.shadowColor = color; ctx.stroke(); if (i % 4 === 0 && depth > 0.3) { const innerR = radius * 0.7; for (let a = 0; a < 8; a++) { const angle = (a / 8) * Math.PI * 2 + ts; ctx.beginPath(); ctx.moveTo(cx + Math.cos(angle) * innerR * 0.3, cy + Math.sin(angle) * innerR * 0.3); ctx.lineTo(cx + Math.cos(angle) * innerR, cy + Math.sin(angle) * innerR); ctx.strokeStyle = t.mid; ctx.globalAlpha = z * 0.3 * intensity; ctx.lineWidth = 1; ctx.stroke(); } } } const vortexSize = 40 + bands.bass * 80; for (let ring = 0; ring < 4; ring++) { ctx.beginPath(); ctx.arc(cx, cy, vortexSize * (0.3 + ring * 0.25), 0, Math.PI * 2); ctx.strokeStyle = ring % 2 === 0 ? t.mid : t.treble; ctx.globalAlpha = (0.8 - ring * 0.15) * intensity; ctx.lineWidth = 2 + bands.treble * 4; ctx.shadowBlur = 25; ctx.shadowColor = t.mid; ctx.stroke(); } const centerSize = 20 + bands.treble * 50, center = ctx.createRadialGradient(cx, cy, 0, cx, cy, centerSize); center.addColorStop(0, '#ffffff'); center.addColorStop(0.3, t.mid); center.addColorStop(1, t.treble + '00'); ctx.globalAlpha = 1; ctx.fillStyle = center; ctx.shadowBlur = 50; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(cx, cy, centerSize, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawTunnel(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.035;
+            const bgGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(canvas.width, canvas.height) * 0.5);
+            bgGlow.addColorStop(0, t.mid + '22'); bgGlow.addColorStop(0.5, t.treble + '11'); bgGlow.addColorStop(1, t.bass + '00');
+            ctx.fillStyle = bgGlow; ctx.globalAlpha = 1; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < 30; i++) {
+                const z = i / 30, depth = 1 - z, baseRadius = 30 + z * Math.min(canvas.width, canvas.height) * 0.5;
+                const radius = baseRadius * (1 + bands.bass * 0.4 * depth) * (1 + bands.mid * 0.2 * (1 - z * 0.5));
+                const isHighlight = (i % 3 === 0 && bands.treble > 0.2), color = i % 2 === 0 ? t.bass : (isHighlight ? t.treble : t.mid);
+                ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                ctx.strokeStyle = color; ctx.globalAlpha = z * 0.8 * intensity; ctx.lineWidth = (1 + bands.bass * 5) * depth;
+                ctx.shadowBlur = isHighlight ? 20 : 10; ctx.shadowColor = color; ctx.stroke();
+                if (i % 4 === 0 && depth > 0.3) {
+                    const innerR = radius * 0.7;
+                    for (let a = 0; a < 8; a++) {
+                        const angle = (a / 8) * Math.PI * 2 + timeSpeed;
+                        ctx.beginPath(); ctx.moveTo(cx + Math.cos(angle) * innerR * 0.3, cy + Math.sin(angle) * innerR * 0.3); ctx.lineTo(cx + Math.cos(angle) * innerR, cy + Math.sin(angle) * innerR);
+                        ctx.strokeStyle = t.mid; ctx.globalAlpha = z * 0.3 * intensity; ctx.lineWidth = 1; ctx.stroke();
+                    }
+                }
+            }
+            const vortexSize = 40 + bands.bass * 80;
+            for (let ring = 0; ring < 4; ring++) {
+                ctx.beginPath(); ctx.arc(cx, cy, vortexSize * (0.3 + ring * 0.25), 0, Math.PI * 2);
+                ctx.strokeStyle = ring % 2 === 0 ? t.mid : t.treble; ctx.globalAlpha = (0.8 - ring * 0.15) * intensity;
+                ctx.lineWidth = 2 + bands.treble * 4; ctx.shadowBlur = 25; ctx.shadowColor = t.mid; ctx.stroke();
+            }
+            const centerSize = 20 + bands.treble * 50, center = ctx.createRadialGradient(cx, cy, 0, cx, cy, centerSize);
+            center.addColorStop(0, '#ffffff'); center.addColorStop(0.3, t.mid); center.addColorStop(1, t.treble + '00');
+            ctx.globalAlpha = 1; ctx.fillStyle = center; ctx.shadowBlur = 50; ctx.shadowColor = t.mid;
+            ctx.beginPath(); ctx.arc(cx, cy, centerSize, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawTerrain(bands) { const t = getCycledColors(); const ts = time * speed * 0.015; for (let layer = 0; layer < 3; layer++) { const yBase = canvas.height * (0.5 + layer * 0.12), amp = 80 - layer * 15, yOffset = layer * 30; ctx.beginPath(); ctx.moveTo(0, canvas.height); for (let x = 0; x <= canvas.width; x += 3) { const y = yBase - Math.abs(Math.sin(x * 0.008 + ts * (1 + layer * 0.3)) * amp * (0.3 + bands.bass * 0.7) + Math.sin(x * 0.015 + ts * 1.5) * amp * 0.4 * (0.3 + bands.mid * 0.7) + Math.sin(x * 0.003 + ts * 0.5) * amp * 0.3) - yOffset; ctx.lineTo(x, y); } ctx.lineTo(canvas.width, canvas.height); ctx.closePath(); const colors = [t.treble, t.mid, t.bass], gradient = ctx.createLinearGradient(0, yBase - amp, 0, canvas.height); gradient.addColorStop(0, colors[layer]); gradient.addColorStop(1, colors[layer] + '44'); ctx.fillStyle = gradient; ctx.globalAlpha = (0.8 - layer * 0.15) * intensity; ctx.shadowBlur = 20; ctx.shadowColor = colors[layer]; ctx.fill(); } ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawTerrain(bands) {
+            const t = themes[currentTheme], timeSpeed = time * speed * 0.015;
+            for (let layer = 0; layer < 3; layer++) {
+                const yBase = canvas.height * (0.5 + layer * 0.12), amp = 80 - layer * 15, yOffset = layer * 30;
+                ctx.beginPath(); ctx.moveTo(0, canvas.height);
+                for (let x = 0; x <= canvas.width; x += 3) {
+                    const y = yBase - Math.abs(Math.sin(x * 0.008 + timeSpeed * (1 + layer * 0.3)) * amp * (0.3 + bands.bass * 0.7) + Math.sin(x * 0.015 + timeSpeed * 1.5) * amp * 0.4 * (0.3 + bands.mid * 0.7) + Math.sin(x * 0.003 + timeSpeed * 0.5) * amp * 0.3) - yOffset;
+                    ctx.lineTo(x, y);
+                }
+                ctx.lineTo(canvas.width, canvas.height); ctx.closePath();
+                const colors = [t.treble, t.mid, t.bass], gradient = ctx.createLinearGradient(0, yBase - amp, 0, canvas.height);
+                gradient.addColorStop(0, colors[layer]); gradient.addColorStop(1, colors[layer] + '44');
+                ctx.fillStyle = gradient; ctx.globalAlpha = (0.8 - layer * 0.15) * intensity; ctx.shadowBlur = 20; ctx.shadowColor = colors[layer]; ctx.fill();
+            }
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawFire(bands) { const t = getCycledColors(); const ts = time * speed * 0.03, bottomY = canvas.height, maxFlameHeight = canvas.height * 0.85 * (0.2 + bands.bass * 0.8); for (let x = 0; x < canvas.width; x += 3) { const flicker = Math.sin(x * 0.05 + ts * 10) * 20 * bands.treble, wave = Math.sin(x * 0.015 + ts * 4) * 40 * bands.mid, height = maxFlameHeight + wave + flicker; const gradient = ctx.createLinearGradient(0, bottomY, 0, bottomY - height); gradient.addColorStop(0, t.bass); gradient.addColorStop(0.2, t.bass + 'cc'); gradient.addColorStop(0.4, t.mid); gradient.addColorStop(0.7, t.treble + 'aa'); gradient.addColorStop(1, t.treble + '00'); ctx.fillStyle = gradient; ctx.globalAlpha = 0.9 * intensity; ctx.shadowBlur = 20; ctx.shadowColor = t.mid; ctx.fillRect(x, bottomY - height, 4, height); } if (bands.treble > 0.15) { for (let i = 0; i < Math.floor(bands.treble * 30); i++) { ctx.fillStyle = t.treble; ctx.globalAlpha = Math.random() * 0.8; ctx.shadowBlur = 10; ctx.beginPath(); ctx.arc(Math.random() * canvas.width, bottomY - Math.random() * maxFlameHeight * 0.9, Math.random() * 4 + 1, 0, Math.PI * 2); ctx.fill(); } } ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawFire(bands) {
+            const t = themes[currentTheme], timeSpeed = time * speed * 0.03, bottomY = canvas.height;
+            const maxFlameHeight = canvas.height * 0.85 * (0.2 + bands.bass * 0.8);
+            for (let x = 0; x < canvas.width; x += 3) {
+                const flicker = Math.sin(x * 0.05 + timeSpeed * 10) * 20 * bands.treble;
+                const wave = Math.sin(x * 0.015 + timeSpeed * 4) * 40 * bands.mid;
+                const height = maxFlameHeight + wave + flicker;
+                const gradient = ctx.createLinearGradient(0, bottomY, 0, bottomY - height);
+                gradient.addColorStop(0, t.bass); gradient.addColorStop(0.2, t.bass + 'cc'); gradient.addColorStop(0.4, t.mid); gradient.addColorStop(0.7, t.treble + 'aa'); gradient.addColorStop(1, t.treble + '00');
+                ctx.fillStyle = gradient; ctx.globalAlpha = 0.9 * intensity; ctx.shadowBlur = 20; ctx.shadowColor = t.mid; ctx.fillRect(x, bottomY - height, 4, height);
+            }
+            if (bands.treble > 0.15) {
+                for (let i = 0; i < Math.floor(bands.treble * 30); i++) {
+                    ctx.fillStyle = t.treble; ctx.globalAlpha = Math.random() * 0.8; ctx.shadowBlur = 10;
+                    ctx.beginPath(); ctx.arc(Math.random() * canvas.width, bottomY - Math.random() * maxFlameHeight * 0.9, Math.random() * 4 + 1, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawMushroom(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.02; for (let arm = 0; arm < 6; arm++) { const armAngle = (arm / 6) * Math.PI * 2 + ts; ctx.beginPath(); for (let r = 0; r < Math.min(canvas.width, canvas.height) * 0.45; r += 3) { const spiralAngle = armAngle + r * 0.015 * (1 + bands.bass), x = cx + Math.cos(spiralAngle) * r * (0.5 + bands.mid * 0.5) + Math.sin(ts * 3 + r * 0.05) * 15 * bands.treble, y = cy + Math.sin(spiralAngle) * r * (0.5 + bands.mid * 0.5) + Math.sin(ts * 3 + r * 0.05) * 15 * bands.treble, size = (2 + r * 0.02) * intensity, alpha = (1 - r / (Math.min(canvas.width, canvas.height) * 0.45)) * 0.8; ctx.fillStyle = arm % 2 === 0 ? t.bass : t.mid; ctx.globalAlpha = alpha * intensity; ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill(); } } const capSize = 60 + bands.bass * 100, cap = ctx.createRadialGradient(cx, cy - 20, 0, cx, cy, capSize); cap.addColorStop(0, t.treble); cap.addColorStop(0.5, t.mid + 'cc'); cap.addColorStop(1, t.bass + '00'); ctx.globalAlpha = 0.8 * intensity; ctx.fillStyle = cap; ctx.shadowBlur = 40; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.ellipse(cx, cy, capSize, capSize * 0.6, 0, 0, Math.PI * 2); ctx.fill(); for (let i = 0; i < 12; i++) { const angle = (i / 12) * Math.PI * 2 + ts, dist = capSize * 0.5 * (0.3 + Math.random() * 0.5); ctx.fillStyle = '#ffffff88'; ctx.globalAlpha = 0.5 * intensity; ctx.beginPath(); ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist * 0.6, 5 + Math.random() * 10, 0, Math.PI * 2); ctx.fill(); } ctx.globalAlpha = 0.9 * intensity; ctx.fillStyle = t.treble; ctx.shadowBlur = 30; ctx.beginPath(); ctx.moveTo(cx - 15, cy); ctx.quadraticCurveTo(cx - 20, cy + 80, cx - 10, cy + 120); ctx.lineTo(cx + 10, cy + 120); ctx.quadraticCurveTo(cx + 20, cy + 80, cx + 15, cy); ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawMushroom(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.02;
+            for (let arm = 0; arm < 6; arm++) {
+                const armAngle = (arm / 6) * Math.PI * 2 + timeSpeed;
+                ctx.beginPath();
+                for (let r = 0; r < Math.min(canvas.width, canvas.height) * 0.45; r += 3) {
+                    const spiralAngle = armAngle + r * 0.015 * (1 + bands.bass);
+                    const x = cx + Math.cos(spiralAngle) * r * (0.5 + bands.mid * 0.5) + Math.sin(timeSpeed * 3 + r * 0.05) * 15 * bands.treble;
+                    const y = cy + Math.sin(spiralAngle) * r * (0.5 + bands.mid * 0.5) + Math.sin(timeSpeed * 3 + r * 0.05) * 15 * bands.treble;
+                    ctx.fillStyle = arm % 2 === 0 ? t.bass : t.mid; ctx.globalAlpha = (1 - r / (Math.min(canvas.width, canvas.height) * 0.45)) * 0.8 * intensity;
+                    ctx.beginPath(); ctx.arc(x, y, (2 + r * 0.02) * intensity, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            const capSize = 60 + bands.bass * 100, cap = ctx.createRadialGradient(cx, cy - 20, 0, cx, cy, capSize);
+            cap.addColorStop(0, t.treble); cap.addColorStop(0.5, t.mid + 'cc'); cap.addColorStop(1, t.bass + '00');
+            ctx.globalAlpha = 0.8 * intensity; ctx.fillStyle = cap; ctx.shadowBlur = 40; ctx.shadowColor = t.mid;
+            ctx.beginPath(); ctx.ellipse(cx, cy, capSize, capSize * 0.6, 0, 0, Math.PI * 2); ctx.fill();
+            for (let i = 0; i < 12; i++) {
+                const angle = (i / 12) * Math.PI * 2 + timeSpeed, dist = capSize * 0.5 * (0.3 + Math.random() * 0.5);
+                ctx.fillStyle = '#ffffff88'; ctx.globalAlpha = 0.5 * intensity;
+                ctx.beginPath(); ctx.arc(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist * 0.6, 5 + Math.random() * 10, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.globalAlpha = 0.9 * intensity; ctx.fillStyle = t.treble; ctx.shadowBlur = 30;
+            ctx.beginPath(); ctx.moveTo(cx - 15, cy); ctx.quadraticCurveTo(cx - 20, cy + 80, cx - 10, cy + 120); ctx.lineTo(cx + 10, cy + 120); ctx.quadraticCurveTo(cx + 20, cy + 80, cx + 15, cy); ctx.fill();
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawSacred(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.01, baseR = 50 + bands.bass * 80, flowerRadius = baseR * (1 + bands.mid * 0.5); ctx.beginPath(); ctx.arc(cx, cy, flowerRadius, 0, Math.PI * 2); ctx.strokeStyle = t.mid; ctx.globalAlpha = 0.6 * intensity; ctx.lineWidth = 2 + bands.bass * 4; ctx.shadowBlur = 20; ctx.shadowColor = t.mid; ctx.stroke(); for (let i = 0; i < 6; i++) { const angle = (i / 6) * Math.PI * 2 + ts, x = cx + Math.cos(angle) * flowerRadius, y = cy + Math.sin(angle) * flowerRadius; ctx.beginPath(); ctx.arc(x, y, flowerRadius, 0, Math.PI * 2); ctx.strokeStyle = i % 2 === 0 ? t.bass : t.treble; ctx.globalAlpha = (0.5 - i * 0.05) * intensity; ctx.lineWidth = 2 + bands.treble * 3; ctx.stroke(); } const innerR = flowerRadius * 0.866, points = []; for (let i = 0; i < 6; i++) points.push({ x: cx + Math.cos((i / 6) * Math.PI * 2 + ts * 0.5) * innerR, y: cy + Math.sin((i / 6) * Math.PI * 2 + ts * 0.5) * innerR }); ctx.globalAlpha = 0.5 * intensity; for (let i = 0; i < 6; i++) { for (let j = i + 1; j < 6; j++) { if (j !== i + 3) { ctx.beginPath(); ctx.moveTo(points[i].x, points[i].y); ctx.lineTo(points[j].x, points[j].y); ctx.strokeStyle = t.treble; ctx.lineWidth = 1; ctx.stroke(); } } } ctx.beginPath(); ctx.arc(cx, cy, 20 + bands.treble * 30, 0, Math.PI * 2); ctx.fillStyle = t.mid; ctx.globalAlpha = 0.9 * intensity; ctx.fill(); ctx.beginPath(); ctx.arc(cx, cy, (20 + bands.treble * 30) * 0.5, 0, Math.PI * 2); ctx.fillStyle = '#000'; ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawSacred(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.01, baseR = 50 + bands.bass * 80;
+            const flowerRadius = baseR * (1 + bands.mid * 0.5);
+            ctx.beginPath(); ctx.arc(cx, cy, flowerRadius, 0, Math.PI * 2); ctx.strokeStyle = t.mid; ctx.globalAlpha = 0.6 * intensity; ctx.lineWidth = 2 + bands.bass * 4; ctx.shadowBlur = 20; ctx.shadowColor = t.mid; ctx.stroke();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i / 6) * Math.PI * 2 + timeSpeed, x = cx + Math.cos(angle) * flowerRadius, y = cy + Math.sin(angle) * flowerRadius;
+                ctx.beginPath(); ctx.arc(x, y, flowerRadius, 0, Math.PI * 2); ctx.strokeStyle = i % 2 === 0 ? t.bass : t.treble; ctx.globalAlpha = (0.5 - i * 0.05) * intensity; ctx.lineWidth = 2 + bands.treble * 3; ctx.stroke();
+            }
+            const innerR = flowerRadius * 0.866, points = [];
+            for (let i = 0; i < 6; i++) { points.push({ x: cx + Math.cos((i / 6) * Math.PI * 2 + timeSpeed * 0.5) * innerR, y: cy + Math.sin((i / 6) * Math.PI * 2 + timeSpeed * 0.5) * innerR }); }
+            ctx.globalAlpha = 0.5 * intensity;
+            for (let i = 0; i < 6; i++) { for (let j = i + 1; j < 6; j++) { if (j !== i + 3) { ctx.beginPath(); ctx.moveTo(points[i].x, points[i].y); ctx.lineTo(points[j].x, points[j].y); ctx.strokeStyle = t.treble; ctx.lineWidth = 1; ctx.stroke(); } } }
+            ctx.beginPath(); ctx.arc(cx, cy, 20 + bands.treble * 30, 0, Math.PI * 2); ctx.fillStyle = t.mid; ctx.globalAlpha = 0.9 * intensity; ctx.fill();
+            ctx.beginPath(); ctx.arc(cx, cy, (20 + bands.treble * 30) * 0.5, 0, Math.PI * 2); ctx.fillStyle = '#000'; ctx.fill();
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawLysergic(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.025; function drawFractal(x, y, size, depth, angle) { if (depth <= 0 || size < 5) return; const colors = [t.bass, t.mid, t.treble]; for (let i = 0; i < 4; i++) { const a = angle + (i / 4) * Math.PI * 2 + ts * (depth * 0.2), nx = x + Math.cos(a) * size * 0.8, ny = y + Math.sin(a) * size * 0.8; ctx.beginPath(); ctx.arc(nx, ny, size * (0.3 + bands.bass * 0.3), 0, Math.PI * 2); ctx.fillStyle = colors[(depth + i) % 3]; ctx.globalAlpha = (depth / 6) * 0.7 * intensity; ctx.shadowBlur = 15; ctx.shadowColor = colors[(depth + i) % 3]; ctx.fill(); drawFractal(nx, ny, size * 0.5, depth - 1, a); } } drawFractal(cx, cy, 80 + bands.mid * 60, 5, ts); const glowSize = 40 + bands.treble * 80, glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize); glow.addColorStop(0, '#ffffff'); glow.addColorStop(0.3, t.mid + 'aa'); glow.addColorStop(1, t.treble + '00'); ctx.globalAlpha = 1; ctx.fillStyle = glow; ctx.shadowBlur = 50; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(cx, cy, glowSize, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0; }
+        function drawLysergic(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.025;
+            function drawFractal(x, y, size, depth, angle) {
+                if (depth <= 0 || size < 5) return;
+                const colors = [t.bass, t.mid, t.treble];
+                for (let i = 0; i < 4; i++) {
+                    const a = angle + (i / 4) * Math.PI * 2 + timeSpeed * (depth * 0.2);
+                    const nx = x + Math.cos(a) * size * 0.8, ny = y + Math.sin(a) * size * 0.8;
+                    ctx.beginPath(); ctx.arc(nx, ny, size * (0.3 + bands.bass * 0.3), 0, Math.PI * 2);
+                    ctx.fillStyle = colors[(depth + i) % 3]; ctx.globalAlpha = (depth / 6) * 0.7 * intensity;
+                    ctx.shadowBlur = 15; ctx.shadowColor = colors[(depth + i) % 3]; ctx.fill();
+                    drawFractal(nx, ny, size * 0.5, depth - 1, a);
+                }
+            }
+            drawFractal(cx, cy, 80 + bands.mid * 60, 5, timeSpeed);
+            const glowSize = 40 + bands.treble * 80, glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowSize);
+            glow.addColorStop(0, '#ffffff'); glow.addColorStop(0.3, t.mid + 'aa'); glow.addColorStop(1, t.treble + '00');
+            ctx.globalAlpha = 1; ctx.fillStyle = glow; ctx.shadowBlur = 50; ctx.shadowColor = t.mid;
+            ctx.beginPath(); ctx.arc(cx, cy, glowSize, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+        }
         
-        function drawTool(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.012; for (let layer = 0; layer < 5; layer++) { const layerY = cy - (layer - 2.5) * (80 + bands.bass * 40), layerW = 50 + layer * 60 + bands.mid * 100, layerH = 40 + layer * 30; ctx.beginPath(); ctx.moveTo(cx, layerY - layerH); ctx.lineTo(cx + layerW, layerY); ctx.lineTo(cx, layerY + layerH); ctx.lineTo(cx - layerW, layerY); ctx.closePath(); const colors = [t.bass, t.mid, t.treble, t.bass, t.mid]; ctx.fillStyle = colors[layer]; ctx.globalAlpha = (0.9 - layer * 0.1) * intensity; ctx.shadowBlur = 25; ctx.shadowColor = colors[layer]; ctx.fill(); ctx.strokeStyle = '#ffffff44'; ctx.lineWidth = 1; ctx.stroke(); } for (let i = 0; i < 3; i++) { const angle = (i / 3) * Math.PI * 2 + ts * 2, dist = 150 + Math.sin(ts * 4 + i) * 30 + bands.treble * 50; ctx.save(); ctx.translate(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist); ctx.rotate(angle + ts); const triSize = 30 + bands.bass * 20; ctx.beginPath(); ctx.moveTo(0, -triSize); ctx.lineTo(triSize * 0.866, triSize * 0.5); ctx.lineTo(-triSize * 0.866, triSize * 0.5); ctx.closePath(); ctx.fillStyle = i % 2 === 0 ? t.treble : t.mid; ctx.globalAlpha = 0.8 * intensity; ctx.shadowBlur = 20; ctx.shadowColor = ctx.fillStyle; ctx.fill(); ctx.restore(); } const emblemSize = 25 + bands.treble * 40; ctx.beginPath(); for (let i = 0; i < 6; i++) { const angle = (i / 6) * Math.PI * 2 - Math.PI/2, x = cx + Math.cos(angle) * emblemSize, y = cy + Math.sin(angle) * emblemSize; if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); } ctx.closePath(); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.9 * intensity; ctx.shadowBlur = 30; ctx.shadowColor = t.mid; ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
+        function drawTool(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.012;
+            for (let layer = 0; layer < 5; layer++) {
+                const layerY = cy - (layer - 2.5) * (80 + bands.bass * 40), layerW = 50 + layer * 60 + bands.mid * 100, layerH = 40 + layer * 30;
+                ctx.beginPath(); ctx.moveTo(cx, layerY - layerH); ctx.lineTo(cx + layerW, layerY); ctx.lineTo(cx, layerY + layerH); ctx.lineTo(cx - layerW, layerY); ctx.closePath();
+                const colors = [t.bass, t.mid, t.treble, t.bass, t.mid];
+                ctx.fillStyle = colors[layer]; ctx.globalAlpha = (0.9 - layer * 0.1) * intensity; ctx.shadowBlur = 25; ctx.shadowColor = colors[layer]; ctx.fill();
+                ctx.strokeStyle = '#ffffff44'; ctx.lineWidth = 1; ctx.stroke();
+            }
+            for (let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2 + timeSpeed * 2, dist = 150 + Math.sin(timeSpeed * 4 + i) * 30 + bands.treble * 50;
+                ctx.save(); ctx.translate(cx + Math.cos(angle) * dist, cy + Math.sin(angle) * dist); ctx.rotate(angle + timeSpeed);
+                const triSize = 30 + bands.bass * 20;
+                ctx.beginPath(); ctx.moveTo(0, -triSize); ctx.lineTo(triSize * 0.866, triSize * 0.5); ctx.lineTo(-triSize * 0.866, triSize * 0.5); ctx.closePath();
+                ctx.fillStyle = i % 2 === 0 ? t.treble : t.mid; ctx.globalAlpha = 0.8 * intensity; ctx.shadowBlur = 20; ctx.shadowColor = ctx.fillStyle; ctx.fill(); ctx.restore();
+            }
+            const emblemSize = 25 + bands.treble * 40;
+            ctx.beginPath(); for (let i = 0; i < 6; i++) { const angle = (i / 6) * Math.PI * 2 - Math.PI/2; const x = cx + Math.cos(angle) * emblemSize, y = cy + Math.sin(angle) * emblemSize; if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+            ctx.closePath(); ctx.fillStyle = '#ffffff'; ctx.globalAlpha = 0.9 * intensity; ctx.shadowBlur = 30; ctx.shadowColor = t.mid; ctx.fill(); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
         
-        function drawCosmic(bands) { const t = getCycledColors(); const cx = canvas.width / 2, cy = canvas.height / 2, ts = time * speed * 0.008; for (let i = 0; i < 5; i++) { const orbitR = 80 + i * 60 + bands.bass * 40, angle = ts * (1 + i * 0.2) + (i / 5) * Math.PI * 2, size = 15 + i * 8 + bands.treble * 20, x = cx + Math.cos(angle) * orbitR, y = cy + Math.sin(angle) * orbitR, bodyGrad = ctx.createRadialGradient(x - size * 0.3, y - size * 0.3, 0, x, y, size); const colors = [t.bass, t.mid, t.treble]; bodyGrad.addColorStop(0, '#ffffff'); bodyGrad.addColorStop(0.3, colors[i % 3]); bodyGrad.addColorStop(1, colors[(i + 1) % 3] + '00'); ctx.globalAlpha = (0.9 - i * 0.1) * intensity; ctx.fillStyle = bodyGrad; ctx.shadowBlur = 30; ctx.shadowColor = colors[i % 3]; ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill(); if (i % 2 === 0) { ctx.beginPath(); ctx.ellipse(x, y, size * 1.8, size * 0.4, angle, 0, Math.PI * 2); ctx.strokeStyle = colors[(i + 1) % 3]; ctx.globalAlpha = 0.5 * intensity; ctx.lineWidth = 3 + bands.mid * 3; ctx.stroke(); } } const sunSize = 40 + bands.bass * 60, sunGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, sunSize); sunGrad.addColorStop(0, '#ffffff'); sunGrad.addColorStop(0.2, t.mid); sunGrad.addColorStop(0.6, t.treble); sunGrad.addColorStop(1, t.bass + '00'); ctx.globalAlpha = 1; ctx.fillStyle = sunGrad; ctx.shadowBlur = 80; ctx.shadowColor = t.mid; ctx.beginPath(); ctx.arc(cx, cy, sunSize, 0, Math.PI * 2); ctx.fill(); for (let i = 0; i < 12; i++) { const rayAngle = (i / 12) * Math.PI * 2 + ts * 0.5, rayLen = sunSize * (1.5 + bands.mid * 0.5); ctx.beginPath(); ctx.moveTo(cx + Math.cos(rayAngle) * sunSize, cy + Math.sin(rayAngle) * sunSize); ctx.lineTo(cx + Math.cos(rayAngle) * rayLen, cy + Math.sin(rayAngle) * rayLen); ctx.strokeStyle = t.treble; ctx.globalAlpha = 0.4 * intensity; ctx.lineWidth = 2 + bands.bass * 4; ctx.shadowBlur = 15; ctx.stroke(); } ctx.shadowBlur = 0; ctx.globalAlpha = 1; }
-        
-        // === SPECIAL EFFECTS ===
-        function applyEffects(bands) {
-            if (effects.shake && bands.bass > 0.6) { shakeOffset.x = (Math.random() - 0.5) * 10 * bands.bass; shakeOffset.y = (Math.random() - 0.5) * 10 * bands.bass; canvas.style.transform = `translate(${shakeOffset.x}px, ${shakeOffset.y}px)`; } else { shakeOffset.x *= 0.9; shakeOffset.y *= 0.9; canvas.style.transform = `translate(${shakeOffset.x}px, ${shakeOffset.y}px)`; }
-            if (effects.flash && bands.treble > 0.7 && time - flashTimer > 10) { ctx.fillStyle = `rgba(255,255,255,${bands.treble * 0.3})`; ctx.fillRect(0, 0, canvas.width, canvas.height); flashTimer = time; }
-            if (effects.glow && bands.bass > lastBassPeak + 0.2) { ctx.fillStyle = `rgba(255,255,255,${bands.bass * 0.15})`; ctx.fillRect(0, 0, canvas.width, canvas.height); }
-            lastBassPeak = lastBassPeak * 0.95 + bands.bass * 0.05;
+        function drawCosmic(bands) {
+            const t = themes[currentTheme], cx = canvas.width / 2, cy = canvas.height / 2, timeSpeed = time * speed * 0.008;
+            for (let i = 0; i < 5; i++) {
+                const orbitR = 80 + i * 60 + bands.bass * 40, angle = timeSpeed * (1 + i * 0.2) + (i / 5) * Math.PI * 2, size = 15 + i * 8 + bands.treble * 20;
+                const x = cx + Math.cos(angle) * orbitR, y = cy + Math.sin(angle) * orbitR;
+                const bodyGrad = ctx.createRadialGradient(x - size * 0.3, y - size * 0.3, 0, x, y, size);
+                const colors = [t.bass, t.mid, t.treble];
+                bodyGrad.addColorStop(0, '#ffffff'); bodyGrad.addColorStop(0.3, colors[i % 3]); bodyGrad.addColorStop(1, colors[(i + 1) % 3] + '00');
+                ctx.globalAlpha = (0.9 - i * 0.1) * intensity; ctx.fillStyle = bodyGrad; ctx.shadowBlur = 30; ctx.shadowColor = colors[i % 3];
+                ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
+                if (i % 2 === 0) {
+                    ctx.beginPath(); ctx.ellipse(x, y, size * 1.8, size * 0.4, angle, 0, Math.PI * 2);
+                    ctx.strokeStyle = colors[(i + 1) % 3]; ctx.globalAlpha = 0.5 * intensity; ctx.lineWidth = 3 + bands.mid * 3; ctx.stroke();
+                }
+            }
+            const sunSize = 40 + bands.bass * 60, sunGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, sunSize);
+            sunGrad.addColorStop(0, '#ffffff'); sunGrad.addColorStop(0.2, t.mid); sunGrad.addColorStop(0.6, t.treble); sunGrad.addColorStop(1, t.bass + '00');
+            ctx.globalAlpha = 1; ctx.fillStyle = sunGrad; ctx.shadowBlur = 80; ctx.shadowColor = t.mid;
+            ctx.beginPath(); ctx.arc(cx, cy, sunSize, 0, Math.PI * 2); ctx.fill();
+            for (let i = 0; i < 12; i++) {
+                const rayAngle = (i / 12) * Math.PI * 2 + timeSpeed * 0.5, rayLen = sunSize * (1.5 + bands.mid * 0.5);
+                ctx.beginPath(); ctx.moveTo(cx + Math.cos(rayAngle) * sunSize, cy + Math.sin(rayAngle) * sunSize); ctx.lineTo(cx + Math.cos(rayAngle) * rayLen, cy + Math.sin(rayAngle) * rayLen);
+                ctx.strokeStyle = t.treble; ctx.globalAlpha = 0.4 * intensity; ctx.lineWidth = 2 + bands.bass * 4; ctx.shadowBlur = 15; ctx.stroke();
+            }
+            ctx.shadowBlur = 0; ctx.globalAlpha = 1;
         }
         
         // === MAIN LOOP ===
-        function animate() { if (!isStarted) return; requestAnimationFrame(animate); time++; ctx.fillStyle = `rgba(5, 5, 8, ${trailAmount})`; ctx.fillRect(0, 0, canvas.width, canvas.height); if (!analyser) return; const bands = getBands(); drawBackground(bands); switch (currentViz) { case 'portal': drawPortal(bands); break; case 'nebula': drawNebula(bands); break; case 'rings': drawRings(bands); break; case 'pulses': drawPulses(bands); break; case 'waves': drawWaves(bands); break; case 'shards': drawShards(bands); break; case 'kaleido': drawKaleido(bands); break; case 'tunnel': drawTunnel(bands); break; case 'terrain': drawTerrain(bands); break; case 'fire': drawFire(bands); break; case 'mushroom': drawMushroom(bands); break; case 'sacred': drawSacred(bands); break; case 'lysergic': drawLysergic(bands); break; case 'tool': drawTool(bands); break; case 'cosmic': drawCosmic(bands); break; } applyEffects(bands); document.getElementById('bassBar').style.width = (bands.bass * 100) + '%'; document.getElementById('midBar').style.width = (bands.mid * 100) + '%'; document.getElementById('trebleBar').style.width = (bands.treble * 100) + '%'; }
+        function animate() {
+            if (!isStarted) return;
+            requestAnimationFrame(animate);
+            time++;
+            
+            ctx.fillStyle = `rgba(5, 5, 8, ${trailAmount})`;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if (!analyser) return;
+            
+            const bands = getBands();
+            drawBackground(bands);
+            
+            switch (currentViz) {
+                case 'portal': drawPortal(bands); break;
+                case 'nebula': drawNebula(bands); break;
+                case 'rings': drawRings(bands); break;
+                case 'pulses': drawPulses(bands); break;
+                case 'waves': drawWaves(bands); break;
+                case 'shards': drawShards(bands); break;
+                case 'kaleido': drawKaleido(bands); break;
+                case 'tunnel': drawTunnel(bands); break;
+                case 'terrain': drawTerrain(bands); break;
+                case 'fire': drawFire(bands); break;
+                case 'mushroom': drawMushroom(bands); break;
+                case 'sacred': drawSacred(bands); break;
+                case 'lysergic': drawLysergic(bands); break;
+                case 'tool': drawTool(bands); break;
+                case 'cosmic': drawCosmic(bands); break;
+            }
+            
+            document.getElementById('bassBar').style.width = (bands.bass * 100) + '%';
+            document.getElementById('midBar').style.width = (bands.mid * 100) + '%';
+            document.getElementById('trebleBar').style.width = (bands.treble * 100) + '%';
+        }
         
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleSettings(); if (e.key === 's' || e.key === 'S') toggleSettings(); if (e.key === 'f' || e.key === 'F') toggleFullscreen(); if (e.key === 'h' || e.key === 'H') selectorsVisible ? hideSelectors() : showSelectors(); });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') toggleSettings();
+            if (e.key === 's' || e.key === 'S') toggleSettings();
+        });
     </script>
 </body>
 </html>
